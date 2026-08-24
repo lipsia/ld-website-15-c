@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/assets/ld-logo.svg" />
+    <meta name="theme-color" content="#05040f" />
+    <!--
+      Baseline CSP. `public/_headers` ships the authoritative policy at the edge;
+      this meta tag keeps the guarantee intact for plain static hosting.
+      style-src allows 'unsafe-inline' because React/R3F inject style
+      attributes for layout; script-src does NOT allow unsafe-inline/eval.
+      frame-ancestors is deliberately absent here — it is ignored when delivered
+      via meta (and warns on every load); _headers carries it, plus X-Frame-Options.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>Lipsia Digital — We bring visions to life</title>
+    <meta
+      name="description"
+      content="Successfully implement transformations and shape the future with digital solutions. Software Engineering, Information Systems and Digital Products from Leipzig."
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

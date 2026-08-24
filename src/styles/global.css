@@ -1,0 +1,151 @@
+/**
+ * Modern reset + global utilities.
+ * Section/component styling lives in sections.css — this file is layout-agnostic.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* NEVER overflow:hidden here — Lenis needs the native scrollbar/scroll height. */
+}
+
+body {
+  min-height: 100svh;
+  overflow-x: hidden;
+  background: var(--surface-0);
+  color: var(--text-hi);
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+}
+
+a {
+  color: inherit;
+}
+
+/* === Utilities === */
+
+.container {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ld-mint);
+}
+
+.sr-only,
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  z-index: var(--z-overlay);
+}
+
+.skip-link:focus {
+  position: fixed;
+  inset-block-start: var(--space-s);
+  inset-inline-start: var(--space-s);
+  width: auto;
+  height: auto;
+  padding: var(--space-xs) var(--space-m);
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  background: var(--surface-2);
+  color: var(--text-hi);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line-hard);
+}
+
+/* === Focus & selection === */
+
+:focus-visible {
+  outline: 2px solid var(--ld-mint);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--ld-mint);
+  color: var(--surface-0);
+}
+
+/* === Reduced motion === */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}

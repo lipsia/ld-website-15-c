@@ -1,0 +1,23 @@
+/**
+ * The WebGL layer.
+ * Fixed and pinned behind all content, and inert to the pointer — the DOM above it
+ * owns every interaction. Sizing uses dvh so mobile browser chrome collapsing
+ * does not letterbox the canvas.
+ */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-canvas);
+  width: 100%;
+  height: 100dvh;
+  pointer-events: none;
+  /* Isolate the canvas into its own compositing layer so DOM repaints above it
+     never force a WebGL re-composite. */
+  contain: strict;
+}
+
+.scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
