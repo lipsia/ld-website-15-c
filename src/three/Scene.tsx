@@ -57,7 +57,7 @@ export function Scene({ policy }: SceneProps) {
 					<Environment resolution={128} frames={1} background={false}>
 						<Lightformer
 							intensity={2.4}
-							color={PALETTE.mint}
+							color={PALETTE.accent}
 							position={[-4, 3, 4]}
 							scale={[8, 8, 1]}
 						/>
@@ -76,7 +76,7 @@ export function Scene({ policy }: SceneProps) {
 					</Environment>
 
 					<ambientLight intensity={0.35} />
-					<directionalLight position={[4, 6, 5]} intensity={1.1} color={PALETTE.mint} />
+					<directionalLight position={[4, 6, 5]} intensity={1.1} color={PALETTE.accent} />
 					<directionalLight position={[-5, -2, -4]} intensity={0.7} color={PALETTE.violet} />
 
 					<LogoParticles count={logoCount} reducedMotion={policy.reducedMotion} />

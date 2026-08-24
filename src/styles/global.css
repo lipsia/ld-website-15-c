@@ -15,7 +15,15 @@
 
 html {
 	-webkit-text-size-adjust: 100%;
-	/* NEVER overflow:hidden here — Lenis needs the native scrollbar/scroll height. */
+	/* NEVER overflow:hidden here — the page relies on the native scroll height. */
+
+	/* Applies only to programmatic and anchor-link scrolling, NOT to the wheel or
+	   trackpad — so in-page nav glides while the scroll gesture itself stays native.
+	   The reduced-motion block below resets this to `auto`. */
+	scroll-behavior: smooth;
+
+	/* Keeps anchor targets clear of the fixed header. */
+	scroll-padding-block-start: var(--space-3xl);
 }
 
 body {
@@ -79,7 +87,7 @@ a {
 	font-weight: 600;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: var(--ld-mint);
+	color: var(--accent);
 }
 
 .sr-only,
@@ -128,12 +136,12 @@ a {
 /* === Focus & selection === */
 
 :focus-visible {
-	outline: 2px solid var(--ld-mint);
+	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 }
 
 ::selection {
-	background: var(--ld-mint);
+	background: var(--accent);
 	color: var(--surface-0);
 }
 

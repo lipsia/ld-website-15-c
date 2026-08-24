@@ -17,7 +17,7 @@ structural analogue of Oxigen's tree.
 | 3D | **three** + **@react-three/fiber** | Declarative scene graph, reconciler-driven |
 | 3D helpers | **@react-three/drei** | `Environment`, `useTexture`, `Float`, perf helpers |
 | Post FX | **@react-three/postprocessing** | Bloom / chromatic aberration / vignette |
-| Scroll | **lenis** | Sub-pixel smooth scroll; single RAF source shared with R3F |
+| Scroll | **native** | No scroll hijacking — smoothing the scroll position reads as lag, not polish. The scene damps its own progress uniform instead. |
 | DOM motion | **motion** (Framer Motion 12) | Declarative reveals, respects reduced-motion |
 | Lint/Format | **Biome 2** | Single fast toolchain, replaces ESLint + Prettier |
 | Package manager | **pnpm 11** | Pinned via `packageManager`; matches the sibling `grundstock-frontend` repo |
@@ -108,7 +108,7 @@ src/
 │   ├── shaders/logoShader.ts             ← GLSL as tagged template strings
 │   ├── ParticleField.tsx, Backdrop.tsx  ← ambient depth layers
 │   └── Effects.tsx                      ← postprocessing chain
-├── scroll/           ScrollProvider.tsx, useScrollProgress.ts   ← Lenis, ref-based
+├── scroll/           ScrollProvider.tsx, useScrollProgress.ts   ← native scroll, ref-based
 ├── components/       Nav, Hero, Competence, Services, Tech, Clients, CTA, Footer
 ├── components/ui/    Reveal, Counter, Marquee, Seo
 └── lib/              capabilities.ts, useReducedMotion.ts, ErrorBoundary.tsx
@@ -143,7 +143,7 @@ Files are partitioned so no two agents write the same path.
 | Role | Owns |
 |---|---|
 | **Lead** (me) | Scaffold, tokens, types, `LogoParticles` + shaders + `logoGeometry`, `Scene`, integration, final review |
-| **Senior A** (sonnet) | Scroll system (Lenis provider, progress store), `ParticleField`, `Backdrop`, `Effects`, camera rig |
+| **Senior A** (sonnet) | Scroll system (provider, progress store), `ParticleField`, `Backdrop`, `Effects`, camera rig |
 | **Senior B** (sonnet) | All DOM sections + `Reveal`/`Counter`/`Marquee`, responsive CSS, a11y |
 | **Junior 1** (haiku) | Repo hygiene: `.gitignore`, `biome.json`, `tsconfig`, README, LICENSE, `_headers`, `.env.example` |
 | **Junior 2** (haiku) | `content/site.ts` (verbatim copy), client marks, `Seo` component + JSON-LD |

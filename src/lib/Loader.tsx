@@ -40,7 +40,7 @@ export function Loader({ label = "Loading experience" }: LoaderProps): React.Rea
 		borderRadius: "50%",
 		background: reducedMotion
 			? "var(--ld-violet)"
-			: "conic-gradient(var(--ld-violet), var(--ld-mint), var(--ld-violet))",
+			: "conic-gradient(var(--ld-violet), var(--accent), var(--ld-violet))",
 		opacity: reducedMotion ? 1 : 0.8,
 	};
 

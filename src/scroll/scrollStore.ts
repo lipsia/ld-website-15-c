@@ -6,7 +6,7 @@
  * pull inside their own animation loop (useFrame) or opt into notifications.
  *
  * This module is dependency-free and side-effect-free by design — it is the
- * contract between the Lenis provider (writer) and the WebGL scene (reader).
+ * contract between the scroll provider (writer) and the WebGL scene (reader).
  */
 
 export type ScrollListener = (progress: number) => void;
@@ -31,7 +31,7 @@ function createScrollStore(): ScrollStore {
 		get: () => progress,
 		getVelocity: () => velocity,
 		set(next, nextVelocity) {
-			// Clamp defensively: Lenis can overshoot during rubber-banding.
+			// Clamp defensively: elastic overscroll reports values outside 0..1.
 			progress = next < 0 ? 0 : next > 1 ? 1 : next;
 			velocity = nextVelocity;
 			for (const listener of listeners) listener(progress);

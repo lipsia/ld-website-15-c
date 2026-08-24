@@ -95,7 +95,7 @@ export function LogoParticles({ count, reducedMotion }: LogoParticlesProps) {
 			uPixelRatio: { value: 1 },
 			uSplit: { value: reducedMotion ? 0 : 1 },
 			uColorCold: { value: new THREE.Vector3(...toVec3(PALETTE.violet)) },
-			uColorWarm: { value: new THREE.Vector3(...toVec3(PALETTE.mint)) },
+			uColorWarm: { value: new THREE.Vector3(...toVec3(PALETTE.accent)) },
 			uColorAccent: { value: new THREE.Vector3(...toVec3(PALETTE.coral)) },
 			uOpacity: { value: 0.6 },
 		}),
@@ -141,13 +141,10 @@ export function LogoParticles({ count, reducedMotion }: LogoParticlesProps) {
 			solidMaterial.visible = solidMaterial.opacity > 0.01;
 		}
 
-		// Push the mark off dead-centre so the left-aligned reading column stays clear.
-		// Narrow viewports have no free horizontal space, so they keep it centred and
-		// rely on the content's own glass panels for separation instead.
+		// Centred on the origin. An earlier version pushed it right to keep the reading
+		// column clear, but the content sections carry their own translucent panels now,
+		// so they hold their contrast over the mark without it being shoved aside.
 		const group = groupRef.current;
-		if (group) {
-			group.position.x = viewport.width < 6 ? 0 : Math.min(viewport.width * 0.16, 1.5);
-		}
 		if (group && !reducedMotion) {
 			group.rotation.y = Math.sin(state.clock.elapsedTime * 0.08) * 0.22 + eased * Math.PI * 0.35;
 			group.rotation.x = Math.sin(state.clock.elapsedTime * 0.06) * 0.06;

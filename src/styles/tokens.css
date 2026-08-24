@@ -8,6 +8,13 @@
 	--ld-indigo: #312782;
 	--ld-violet: #5f27d4;
 	--ld-mint: #1ed5a4;
+
+	/* THE accent. Everything expressive routes through this one value: the
+	   crystallised 3D logo, section labels, counters, focus rings, selection and
+	   hover states. Mirrored by PALETTE.accent in src/three/palette.ts. */
+	--accent: #5cc8ff;
+	/* Same hue as a bare triplet, for rgb(var(--accent-rgb) / <alpha>) glows. */
+	--accent-rgb: 92 200 255;
 	--ld-coral: #ff583c;
 
 	/* Surfaces — dark-first; the 3D scene needs a deep ground */

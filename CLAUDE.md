@@ -19,7 +19,7 @@ Single-page marketing site for lipsia.digital. Centrepiece is the LD logo as a G
 ## Structure & conventions
 
 - `src/three/` — WebGL layer. `Scene.tsx` is canvas root; `LogoParticles.tsx`, `logoGeometry.ts`, `shaders/logoShader.ts` are the hero particle system; `ParticleField.tsx`, `Backdrop.tsx`, `Effects.tsx`, `CameraRig.tsx` are ambient layers.
-- `src/scroll/` — `scrollStore.ts` is a ref-based scroll store (zero re-renders per 60fps scroll); `ScrollProvider.tsx` wires Lenis into it.
+- `src/scroll/` — `scrollStore.ts` is a ref-based scroll store (zero re-renders per 60fps scroll); `ScrollProvider.tsx` feeds it from native scroll events. Scroll is NOT hijacked — smooth-scroll libraries were tried and removed because interpolating the scroll position makes every gesture feel like an ease-in-out animation. The scene damps `uScroll` in its own loop instead.
 - `src/components/` — DOM sections; `src/components/ui/` — primitives (Reveal, Counter, Marquee, Seo).
 - `src/content/site.ts` — ALL copy, transcribed verbatim from lipsia.digital. Never rewrite, "improve" or fix marketing copy.
 - `src/lib/` — `capabilities.ts` produces a `RenderPolicy` (particle count / DPR / postprocessing by device tier); also reduced-motion hook, ErrorBoundary, Loader, StaticFallback.

@@ -14,7 +14,6 @@ A single-page, scroll-driven WebGL experience for lipsia.digital. The centrepiec
 | 3D Utilities | @react-three/drei | 10.7.8 |
 | Post-Processing | @react-three/postprocessing | 3.1.0 |
 | Post-FX Library | postprocessing | 6.39.4 |
-| Smooth Scroll | lenis | 1.3.26 |
 | DOM Motion | motion | 13.1.1 |
 | Type Checker | TypeScript | 7.0.2 |
 | Linter/Formatter | Biome | 2.5.10 |
@@ -75,7 +74,7 @@ src/
 │   ├── Backdrop.tsx                   Depth environment
 │   └── Effects.tsx                    Post-processing chain
 ├── scroll/
-│   ├── ScrollProvider.tsx             Lenis + RAF setup
+│   ├── ScrollProvider.tsx             native scroll → store
 │   └── useScrollProgress.ts           Scroll progress ref store
 ├── components/
 │   ├── Nav.tsx                        Navigation header

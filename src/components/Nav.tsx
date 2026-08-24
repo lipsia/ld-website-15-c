@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { HERO, NAV_LINKS, SITE } from "#/content/site";
 import { scrollStore } from "#/scroll/scrollStore";
 import type { NavLink } from "#/types";
+import { LdMark } from "./ui/LdMark";
 
 const SCROLLED_THRESHOLD_PX = 24;
 
@@ -62,7 +63,9 @@ export function Nav() {
 		<header className="nav" data-scrolled={scrolled}>
 			<div className="nav__inner">
 				<a className="nav__wordmark" href="#hero">
-					{SITE.name}
+					<LdMark className="nav__mark" />
+					{/* The mark is decorative, so the link carries the name itself. */}
+					<span className="sr-only">{SITE.name}</span>
 				</a>
 
 				<nav className="nav__links" aria-label="Primary">

@@ -9,6 +9,8 @@ export const PALETTE = {
 	indigo: "#312782",
 	violet: "#5f27d4",
 	mint: "#1ed5a4",
+	/** THE accent — mirrors --accent in tokens.css. Keep the two in sync. */
+	accent: "#5cc8ff",
 	coral: "#ff583c",
 	surface: "#05040f",
 } as const;
