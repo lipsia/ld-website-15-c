@@ -136,7 +136,7 @@ export function LogoParticles({ count, reducedMotion }: LogoParticlesProps) {
 		const solidMaterial = solidMaterialRef.current;
 		if (solidMaterial) {
 			const fadeIn = subProgress(eased, 0.34, 0.48);
-			const fadeOut = 1 - subProgress(eased, 0.72, 0.86);
+			const fadeOut = 1 - subProgress(eased, 0.6, 0.73);
 			solidMaterial.opacity = fadeIn * fadeOut * 0.3;
 			solidMaterial.visible = solidMaterial.opacity > 0.01;
 		}

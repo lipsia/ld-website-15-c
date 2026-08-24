@@ -105,6 +105,7 @@ uniform float uSplit;
 varying float vProgress;
 varying float vSeed;
 varying float vSpeed;
+varying float vFade;
 
 ${NOISE_CHUNK}
 
@@ -149,13 +150,22 @@ void main() {
   float split = window(uScroll, 0.60, 0.84) * uSplit;
   pos.z += sign(aTarget.z + 0.0001) * split * 1.15;
 
-  // Dispersal: everything streams outward into the footer as a starfield.
-  float dispersal = window(uScroll, 0.82, 1.0);
-  float burst = easeOut(dispersal);
-  pos += normalize(pos + vec3(0.0001)) * burst * (7.0 + aSeed * 16.0);
-  pos += curl(pos * 0.08 + uTime * 0.03) * burst * 3.2;
+  // Dissolve. Once the camera has passed through the split, the mark lets go: each
+  // particle drifts off on its own schedule and fades out, so the form thins away
+  // instead of surviving as a cloud of debris behind the rest of the page.
+  //
+  // The stagger is what makes it read as dissolving rather than as one shove — the
+  // earlier version threw every particle outward at once, hard, and never faded them.
+  float release = 0.70 + aSeed * 0.13;
+  float dissolve = easeOut(window(uScroll, release, release + 0.17));
 
-  vSpeed = unsettled + burst * 0.8;
+  // Gentle: a drift, not a blast. Large offsets here just smear the particles into
+  // streaks across the sections that follow.
+  pos += normalize(pos + vec3(0.0001)) * dissolve * (1.1 + aSeed * 2.0);
+  pos += curl(pos * 0.10 + uTime * 0.05) * dissolve * 1.9;
+
+  vFade = 1.0 - dissolve;
+  vSpeed = unsettled * vFade;
 
   vec4 mv = modelViewMatrix * vec4(pos, 1.0);
   gl_Position = projectionMatrix * mv;
@@ -165,7 +175,8 @@ void main() {
   // the camera during the fly-through balloon into screen-filling discs, and distant
   // ones collapse below one pixel and drop out of the mark entirely.
   float size = uSize * (0.55 + aSeed * 0.9);
-  size *= 1.0 + burst * 0.5;
+  // Contract slightly as it goes, which reads as receding rather than exploding.
+  size *= 1.0 - dissolve * 0.3;
   gl_PointSize = clamp(size * uPixelRatio * (1.0 / max(-mv.z, 0.1)), 1.0, 7.0);
 }
 `;
@@ -181,6 +192,7 @@ uniform float uOpacity;
 varying float vProgress;
 varying float vSeed;
 varying float vSpeed;
+varying float vFade;
 
 void main() {
   // Round the square point sprite and give it a soft core.
@@ -203,7 +215,9 @@ void main() {
   // destroys the letterforms it is supposed to describe.
   color *= 0.45 + vProgress * 0.5;
 
-  float alpha = mask * uOpacity * (0.18 + vProgress * 0.34);
+  // vFade carries the dissolve to zero, so the mark actually leaves the page.
+  float alpha = mask * uOpacity * (0.18 + vProgress * 0.34) * vFade;
+  if (alpha < 0.002) discard;
   gl_FragColor = vec4(color, alpha);
 
   #include <colorspace_fragment>

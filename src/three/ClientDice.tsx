@@ -95,7 +95,6 @@ const scratchTarget = new THREE.Quaternion();
 const scratchInverse = new THREE.Quaternion();
 const scratchPos = new THREE.Vector3();
 const IDENTITY = new THREE.Quaternion();
-const FORWARD = new THREE.Vector3(0, 0, 1);
 
 function Dice({ marks, logos, controls, reducedMotion }: DiceProps) {
 	const groupRef = useRef<THREE.Group>(null);
@@ -126,10 +125,29 @@ function Dice({ marks, logos, controls, reducedMotion }: DiceProps) {
 			Number.POSITIVE_INFINITY,
 		);
 		const size = Number.isFinite(smallest) ? smallest * TILE_FIT : 0.5;
-		return faces.map((face: PolyFace) => ({
-			quaternion: new THREE.Quaternion().setFromUnitVectors(FORWARD, face.normal),
-			size,
-		}));
+
+		const xAxis = new THREE.Vector3();
+		const yAxis = new THREE.Vector3();
+		const reference = new THREE.Vector3();
+		const basis = new THREE.Matrix4();
+
+		return faces.map((face: PolyFace) => {
+			// A full orientation, not just an alignment. `setFromUnitVectors` only
+			// guarantees that +Z lands on the face normal and leaves the roll about that
+			// axis arbitrary — which is why logos sat at random angles, some of them
+			// upside down. Building an explicit basis pins the roll so every wordmark
+			// stands upright with respect to world up.
+			reference.set(0, 1, 0);
+			// Near the poles world up is parallel to the normal and the cross product
+			// collapses, so fall back to a different reference there.
+			if (Math.abs(face.normal.y) > 0.95) reference.set(0, 0, 1);
+
+			xAxis.crossVectors(reference, face.normal).normalize();
+			yAxis.crossVectors(face.normal, xAxis).normalize();
+			basis.makeBasis(xAxis, yAxis, face.normal);
+
+			return { quaternion: new THREE.Quaternion().setFromRotationMatrix(basis), size };
+		});
 	}, [faces]);
 
 	useEffect(() => {

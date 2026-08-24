@@ -42,7 +42,11 @@ const FRAGMENT_SHADER = /* glsl */ `
     // toward the center of the view.
     float centerGlow = pow(max(dir.z * -0.5 + 0.5, 0.0), 5.0);
     vec3 gradientColor = mix(uIndigo, uViolet, uScroll);
-    float glowIntensity = 0.08 + uScroll * 0.09;
+    // The glow builds through the first half, then falls away entirely as the camera
+    // passes through the split mark. Everything after that — clients, CTA, footer —
+    // plays out against the flat near-black ground rather than a purple wash.
+    float settle = 1.0 - smoothstep(0.64, 0.82, uScroll);
+    float glowIntensity = (0.08 + uScroll * 0.09) * settle;
 
     vec3 color = mix(uSurface, gradientColor, centerGlow * glowIntensity);
 
