@@ -73,6 +73,9 @@ export function Nav() {
 
 				<a className="btn btn--primary nav__cta" href={HERO.ctaPrimary.href}>
 					{HERO.ctaPrimary.label}
+					<span className="btn__arrow" aria-hidden="true">
+						&rarr;
+					</span>
 				</a>
 
 				<button

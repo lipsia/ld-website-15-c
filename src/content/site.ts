@@ -27,10 +27,12 @@ export const NAV_LINKS = [
 
 export const HERO = {
 	headline: "We bring visions to life",
+	/** Rendered as the pixel mosaic in the hero. One entry per line. */
+	wordmark: ["lipsia digital"],
 	subheadline:
 		"Successfully implement transformations and shape the future with digital solutions.",
 	disciplines: ["Software Engineering", "Information Systems", "Digital products"],
-	ctaPrimary: { label: "Contacts", href: "#contact" },
+	ctaPrimary: { label: "Contact", href: "#contact" },
 	ctaSecondary: { label: "Career", href: "#" },
 } as const;
 

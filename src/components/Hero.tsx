@@ -1,50 +1,36 @@
-import { HERO } from "#/content/site";
+import { HERO, SITE } from "#/content/site";
+import { PixelWordmark } from "./ui/PixelWordmark";
 import { Reveal } from "./ui/Reveal";
 
-function isFutureLink(href: string): boolean {
-	return href === "#";
-}
-
+/**
+ * The hero is the wordmark and almost nothing else: the brand name at full width as a
+ * pixel mosaic, then the tagline and the three disciplines set small underneath.
+ *
+ * The `h1` carries the brand name as real text and the canvas is decorative, so the
+ * page's most important heading is machine-readable even though it is drawn.
+ */
 export function Hero() {
 	return (
 		<section id="hero" className="hero" aria-labelledby="hero-heading">
 			<div className="container hero__inner">
-				<Reveal>
-					<h1 id="hero-heading">{HERO.headline}</h1>
-				</Reveal>
+				<h1 id="hero-heading" className="hero__wordmark-heading">
+					<span className="sr-only">{SITE.name}</span>
+					<PixelWordmark lines={HERO.wordmark} />
+				</h1>
 
-				<Reveal delay={0.1}>
-					<p className="hero__subhead">{HERO.subheadline}</p>
-				</Reveal>
+				<Reveal delay={0.15} className="hero__meta">
+					<p className="hero__tagline">{HERO.headline}</p>
 
-				<Reveal delay={0.2}>
 					<ul className="hero__disciplines">
 						{HERO.disciplines.map((discipline) => (
 							<li key={discipline}>{discipline}</li>
 						))}
 					</ul>
 				</Reveal>
-
-				<Reveal delay={0.3}>
-					<div className="hero__ctas">
-						<a className="btn btn--primary" href={HERO.ctaPrimary.href}>
-							{HERO.ctaPrimary.label}
-						</a>
-						<a
-							className="btn btn--ghost"
-							href={HERO.ctaSecondary.href}
-							{...(isFutureLink(HERO.ctaSecondary.href)
-								? { "aria-disabled": true, "data-pending": true }
-								: {})}
-						>
-							{HERO.ctaSecondary.label}
-						</a>
-					</div>
-				</Reveal>
 			</div>
 
 			<div className="hero__cue" aria-hidden="true">
-				↓
+				<span className="hero__cue-line" />
 			</div>
 		</section>
 	);

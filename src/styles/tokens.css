@@ -16,6 +16,10 @@
 	--surface-2: #120e26;
 	--surface-3: #1b1536;
 
+	/* A warm off-white slab colour for solid buttons. Distinct from --text-hi
+	   (cool, violet-tinted) so a filled button never reads as a block of body text. */
+	--paper: #f2efe6;
+
 	/* Text */
 	--text-hi: #f4f2ff;
 	--text-mid: #b3adcf;

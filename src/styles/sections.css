@@ -40,9 +40,10 @@ section {
 	justify-content: center;
 	gap: var(--space-2xs);
 	min-height: 44px;
-	padding-inline: var(--space-l);
-	border-radius: var(--radius-pill);
+	padding-inline: var(--space-m);
+	border-radius: var(--radius-s);
 	font-weight: 600;
+	letter-spacing: 0.01em;
 	font-size: var(--step--1);
 	text-decoration: none;
 	cursor: pointer;
@@ -53,18 +54,27 @@ section {
 }
 
 .btn:hover {
-	transform: translateY(-2px);
+	transform: none;
 }
 
 .btn--primary {
-	background: var(--ld-mint);
+	background: var(--paper);
 	color: var(--surface-0);
-	border: 1px solid var(--ld-mint);
+	border: 1px solid var(--paper);
 }
 
 .btn--primary:hover {
-	background: var(--text-hi);
-	border-color: var(--text-hi);
+	background: var(--ld-mint);
+	border-color: var(--ld-mint);
+}
+
+/* The arrow nudges forward on hover — the only motion the button needs. */
+.btn__arrow {
+	transition: transform var(--dur-mid) var(--ease-out-expo);
+}
+
+.btn:hover .btn__arrow {
+	transform: translateX(3px);
 }
 
 .btn--ghost {
@@ -184,6 +194,12 @@ section {
 	display: none;
 }
 
+@media (min-width: 48rem) {
+	.nav__cta {
+		display: inline-flex;
+	}
+}
+
 .nav__toggle {
 	display: inline-flex;
 	align-items: center;
@@ -233,58 +249,143 @@ section {
 	min-height: 100svh;
 	display: flex;
 	align-items: center;
-	padding-block: calc(var(--space-3xl) + var(--space-l));
+	padding-block: calc(var(--space-3xl) + var(--space-m)) var(--space-2xl);
 	pointer-events: none;
+	/* The wordmark canvas overhangs its box horizontally to allow scatter, which would
+	   otherwise widen the document. `clip` contains it without creating a scroll
+	   container, so the vertical overhang still shows. */
+	overflow-x: clip;
 }
 
 .hero__inner {
-	max-width: 46rem;
+	/* Full-bleed, unlike the other sections: the wordmark is meant to span the page. */
+	max-width: none;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: clamp(var(--space-l), 4vh, var(--space-2xl));
+}
+
+/* The heading is a positioning wrapper only — its text is visually hidden and the
+   mosaic canvas does the drawing. */
+.hero__wordmark-heading {
+	margin: 0;
+	font-size: 0;
+	line-height: 0;
+}
+
+.wordmark {
+	position: relative;
+	width: 100%;
+	/* Sized so the glyph fit is limited by WIDTH, not height — that is what makes the
+	   mark span the page instead of being capped vertically. */
+	height: clamp(5rem, 15vw, 14rem);
+	/* The canvas overhangs this box on every side to give pixels room to scatter, so it
+	   must not swallow pointer events from the nav or the content beneath it. The
+	   component tracks the cursor on `window`, so it needs none of its own. */
+	pointer-events: none;
+}
+
+/* Pulled out of flow and inset by the bleed amount (set in JS alongside the buffer
+   size, since the two must always agree). */
+.wordmark canvas {
+	display: block;
+	position: absolute;
+}
+
+@media (max-width: 40rem) {
+	.wordmark {
+		/* Two stacked words need roughly double the height to stay legible. */
+		height: clamp(8rem, 42vw, 13rem);
+	}
+}
+
+.hero__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--space-s) clamp(var(--space-m), 4vw, var(--space-2xl));
 	pointer-events: auto;
+	border-block-start: 1px solid var(--line-soft);
+	padding-block-start: var(--space-m);
 }
 
-.hero h1 {
-	font-size: var(--step-6);
-	margin-block-end: var(--space-m);
-}
-
-.hero__subhead {
+.hero__tagline {
 	font-size: var(--step-1);
-	color: var(--text-mid);
-	max-width: var(--measure);
-	margin-block-end: var(--space-l);
+	color: var(--text-hi);
+	margin: 0;
+	text-wrap: balance;
 }
 
+/* Small, mono, letter-spaced — a spec line under the mark rather than a second headline. */
 .hero__disciplines {
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--space-s);
-	margin-block-end: var(--space-l);
-}
-
-.hero__disciplines li {
-	padding: var(--space-2xs) var(--space-m);
-	border: 1px solid var(--line-soft);
-	border-radius: var(--radius-pill);
+	align-items: center;
+	gap: var(--space-2xs) var(--space-s);
+	margin: 0;
+	font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 	font-size: var(--step--1);
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
 	color: var(--text-mid);
 }
 
-.hero__ctas {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--space-m);
+/* Hairline separators between disciplines, drawn rather than typed so the list stays
+   semantic and screen readers never announce a stray bullet character. */
+.hero__disciplines li + li::before {
+	content: "";
+	display: inline-block;
+	inline-size: 1px;
+	block-size: 0.85em;
+	margin-inline-end: var(--space-s);
+	vertical-align: -0.1em;
+	background: var(--line-hard);
+}
+
+@media (max-width: 40rem) {
+	.hero__meta {
+		flex-direction: column;
+		gap: var(--space-m);
+	}
+
+	.hero__disciplines {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--space-2xs);
+	}
+
+	.hero__disciplines li + li::before {
+		content: none;
+	}
 }
 
 .hero__cue {
 	position: absolute;
 	inset-block-end: var(--space-l);
-	inset-inline-start: 0;
-	inset-inline-end: 0;
-	display: flex;
-	justify-content: center;
-	color: var(--text-lo);
-	font-size: var(--step--1);
+	inset-inline-start: var(--gutter);
 	pointer-events: none;
+}
+
+.hero__cue-line {
+	display: block;
+	inline-size: 1px;
+	block-size: var(--space-l);
+	background: linear-gradient(to bottom, var(--line-hard), transparent);
+	animation: hero-cue 2.4s var(--ease-in-out-quart) infinite;
+	transform-origin: top;
+}
+
+@keyframes hero-cue {
+	0%,
+	100% {
+		transform: scaleY(0.35);
+		opacity: 0.4;
+	}
+	50% {
+		transform: scaleY(1);
+		opacity: 1;
+	}
 }
 
 /* === Competence / Services === */
