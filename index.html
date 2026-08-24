@@ -4,6 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/assets/ld-logo.svg" />
+    <!--
+      Both faces are on the critical path: Rubik sets every heading, Plex Mono the
+      spec line under the mark, and the hero pixel mosaic cannot rasterise until
+      Rubik resolves. Preloading collapses the CSS -> @font-face -> download chain
+      into one round trip. `crossorigin` is required even same-origin, because fonts
+      are always fetched in CORS mode — omit it and the browser fills a second,
+      unusable cache entry and downloads the file twice. The latin-ext files are
+      deliberately not preloaded: unicode-range keeps them unfetched for our copy.
+    -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/assets/fonts/rubik-latin.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/assets/fonts/ibm-plex-mono-400-latin.woff2"
+      crossorigin
+    />
     <meta name="theme-color" content="#05040f" />
     <!--
       Baseline CSP. `public/_headers` ships the authoritative policy at the edge;

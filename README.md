@@ -74,7 +74,8 @@ src/
 ├── content/
 │   └── site.ts                        Typed copy and constants
 ├── styles/
-│   ├── tokens.css                     Design tokens (colors, spacing)
+│   ├── fonts.css                      Self-hosted @font-face (Rubik, IBM Plex Mono)
+│   ├── tokens.css                     Design tokens (colors, spacing, families)
 │   └── global.css                     Global styles
 ├── three/
 │   ├── Scene.tsx                      Canvas root, DPR policy
@@ -117,6 +118,8 @@ src/
 **3D Scene**: The hero particle system is a single GPU-driven draw call using GLSL shaders and instanced rendering. Particle positions, morphing, and color are computed on the GPU; the CPU updates one `uScroll` uniform per frame.
 
 **Fixed Canvas**: The WebGL canvas is fixed behind translucent DOM sections using `pointer-events: none` so interactive elements remain accessible.
+
+**Typography**: Rubik (headings and body) and IBM Plex Mono (eyebrows, the hero spec line) — the pairing used by 10years.lipsia.digital. Both are SIL OFL and committed to `public/assets/fonts/` as `woff2`; a Google Fonts `<link>` would be blocked by `font-src 'self'`. Rubik ships as a single variable file spanning 300–700, and `unicode-range` keeps the `latin-ext` subsets unfetched for English copy, so a cold load pulls three files totalling ~55 kB. The hero pixel mosaic is rasterised from Rubik through a canvas, which means it must wait on `document.fonts.load()` and re-stamp itself — a bitmap baked before the face resolves would keep the fallback silhouette forever.
 
 ## Accessibility
 

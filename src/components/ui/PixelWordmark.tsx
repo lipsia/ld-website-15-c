@@ -84,6 +84,18 @@ function resolveLines(lines: readonly string[], width: number): string[] {
  * landed on an opaque pixel. Sampling a rasterised glyph (rather than tracing outlines)
  * is what produces the bitmap-screen quality of the reference.
  */
+
+/**
+ * The mosaic is stamped from Rubik, the brand face, so the mark matches the headings
+ * it sits above. Quoted and duplicated from --font-sans rather than read from CSS
+ * because a canvas font shorthand takes a literal string, not a var().
+ *
+ * 700 is Rubik's ceiling — the variable file spans 300-700. Asking for more does not
+ * get a heavier mark, it just risks the browser faux-bolding on top of the real 700.
+ */
+const WORDMARK_FAMILY = '"Rubik", "Helvetica Neue", Helvetica, Arial, sans-serif';
+const WORDMARK_WEIGHT = 700;
+
 function buildField(
 	canvasWidth: number,
 	canvasHeight: number,
@@ -100,14 +112,11 @@ function buildField(
 	const octx = off.getContext("2d", { willReadFrequently: true });
 	if (!octx) return null;
 
-	// No webfonts are permitted by our CSP, so the wordmark leans on the heaviest
-	// weight of the platform stack. 1000 resolves to the boldest face available.
-	const family = 'ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif';
 	const lineCount = lines.length;
 
 	// Fit by width: measure at a reference size, then scale to fill the canvas.
 	const probe = 100;
-	octx.font = `1000 ${probe}px ${family}`;
+	octx.font = `${WORDMARK_WEIGHT} ${probe}px ${WORDMARK_FAMILY}`;
 	let widest = 1;
 	for (const line of lines) {
 		widest = Math.max(widest, octx.measureText(line).width);
@@ -120,7 +129,7 @@ function buildField(
 	const byHeight = (fitHeight * 0.96) / lineCount;
 	const fontSize = Math.max(8, Math.min(byWidth, byHeight));
 
-	octx.font = `1000 ${fontSize}px ${family}`;
+	octx.font = `${WORDMARK_WEIGHT} ${fontSize}px ${WORDMARK_FAMILY}`;
 	octx.fillStyle = "#fff";
 	octx.textAlign = "center";
 	octx.textBaseline = "middle";
@@ -343,6 +352,21 @@ export function PixelWordmark({ lines, className }: PixelWordmarkProps) {
 
 		measure();
 
+		// buildField bakes the mark into a pixel grid ONCE per measure, so it silently
+		// captures whatever face was available at that instant. On a cold load that is
+		// the Arial fallback, and without this the mosaic would keep Arial's silhouette
+		// for the rest of the session even though every heading around it is Rubik.
+		// ResizeObserver does not help: nothing resizes when a font swaps in.
+		let stale = false;
+		document.fonts
+			?.load(`${WORDMARK_WEIGHT} 100px "Rubik"`)
+			.then(() => {
+				if (!stale) measure();
+			})
+			// A font that fails to load is not worth breaking the hero over — the
+			// fallback mosaic already on screen stays.
+			.catch(() => {});
+
 		const observer = new ResizeObserver(measure);
 		observer.observe(wrap);
 
@@ -371,6 +395,7 @@ export function PixelWordmark({ lines, className }: PixelWordmarkProps) {
 		}
 
 		return () => {
+			stale = true;
 			cancelAnimationFrame(raf);
 			observer.disconnect();
 			window.removeEventListener("pointermove", onPointerMove);

@@ -1,0 +1,87 @@
+/**
+ * Self-hosted webfonts — the type system shared with 10years.lipsia.digital.
+ *
+ * Rubik (headings and body) and IBM Plex Mono (eyebrows, counters, spec lines) are
+ * both SIL Open Font License 1.1; see assets/fonts/OFL-*.txt.
+ *
+ * Fetched from Google Fonts and committed, NOT linked. Our CSP is `font-src 'self'`
+ * with no third-party origins, so a `fonts.googleapis.com` <link> would simply be
+ * blocked — and self-hosting also drops two DNS/TLS handshakes from the critical path.
+ *
+ * Rubik is the VARIABLE face: one file spans 300-700, so every weight the design uses
+ * costs a single download. IBM Plex Mono has no variable build on Google Fonts, hence
+ * one static file per weight.
+ *
+ * `unicode-range` is copied verbatim from the upstream CSS: it lets the browser skip
+ * the latin-ext file entirely unless the page actually contains a character from it,
+ * which for our English copy it never does.
+ *
+ * Regenerating: re-download from the css2 API with a modern-Chrome UA (an old UA gets
+ * you .ttf), keep the ranges in sync, and preload the latin files in index.html.
+ */
+
+/* Rubik variable, latin — preloaded in index.html */
+@font-face {
+	font-family: "Rubik";
+	font-style: normal;
+	font-weight: 300 700;
+	font-display: swap;
+	src: url("/assets/fonts/rubik-latin.woff2") format("woff2");
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Rubik variable, latin-ext */
+@font-face {
+	font-family: "Rubik";
+	font-style: normal;
+	font-weight: 300 700;
+	font-display: swap;
+	src: url("/assets/fonts/rubik-latin-ext.woff2") format("woff2");
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* IBM Plex Mono 400, latin — preloaded in index.html */
+@font-face {
+	font-family: "IBM Plex Mono";
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("/assets/fonts/ibm-plex-mono-400-latin.woff2") format("woff2");
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* IBM Plex Mono 400, latin-ext */
+@font-face {
+	font-family: "IBM Plex Mono";
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("/assets/fonts/ibm-plex-mono-400-latin-ext.woff2") format("woff2");
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* IBM Plex Mono 500, latin */
+@font-face {
+	font-family: "IBM Plex Mono";
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url("/assets/fonts/ibm-plex-mono-500-latin.woff2") format("woff2");
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* IBM Plex Mono 500, latin-ext */
+@font-face {
+	font-family: "IBM Plex Mono";
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url("/assets/fonts/ibm-plex-mono-500-latin-ext.woff2") format("woff2");
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}

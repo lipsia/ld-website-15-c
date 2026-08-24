@@ -32,6 +32,7 @@ Single-page marketing site for lipsia.digital. Centrepiece is the LD logo as a G
 - `src/content/site.ts` — ALL copy, transcribed verbatim from lipsia.digital. Never rewrite, "improve" or fix marketing copy.
 - `src/lib/` — `capabilities.ts` produces a `RenderPolicy` (particle count / DPR / postprocessing by device tier); also reduced-motion hook, ErrorBoundary, Loader, StaticFallback.
 - `src/styles/tokens.css` — ONLY place colours/spacing/type-scale are defined. Never hardcode hex or px font-size. Mirror in `src/three/palette.ts` for shaders — must stay in sync.
+- `src/styles/fonts.css` — self-hosted `@font-face` for Rubik (headings + body) and IBM Plex Mono (eyebrows, hero spec line), the same pairing as 10years.lipsia.digital. Files in `public/assets/fonts/`, both OFL. Never add a Google Fonts `<link>` — `font-src 'self'` blocks it. Reach for a family via `--font-sans` / `--font-mono`, never by name. Plex Mono ships 400/500 only; asking for 600+ gets a synthesised smear.
 - Import via `#/*` alias (→ `src/*`), not deep relative paths.
 
 ## WebGL layer

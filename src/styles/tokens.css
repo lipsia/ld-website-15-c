@@ -36,6 +36,14 @@
 	--line-soft: rgb(255 255 255 / 8%);
 	--line-hard: rgb(255 255 255 / 16%);
 
+	/* Type — the pairing carried over from 10years.lipsia.digital. Rubik is the
+	   voice for headings and body; IBM Plex Mono is reserved for the small
+	   letter-spaced labels (eyebrows, the hero spec line). Faces are self-hosted
+	   in src/styles/fonts.css — never add a CDN <link>, the CSP forbids it.
+	   Plex ships 400 and 500 only: asking for 600+ gets you a synthesised smear. */
+	--font-sans: "Rubik", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	--font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
 	/* Type scale — fluid, clamped */
 	--step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.94rem);
 	--step-0: clamp(1rem, 0.96rem + 0.2vw, 1.13rem);

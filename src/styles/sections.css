@@ -414,7 +414,7 @@ section {
 	align-items: center;
 	gap: var(--space-2xs) var(--space-s);
 	margin: 0;
-	font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+	font-family: var(--font-mono);
 	font-size: var(--step--1);
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
@@ -521,6 +521,10 @@ section {
 	display: block;
 	font-size: var(--step-5);
 	font-weight: 700;
+	/* Rubik's default figures are proportional: 1 is much narrower than 0, so a
+	   counter animating 0 -> 30 visibly reflows on every digit change. Rubik carries
+	   a real `tnum` set, which pins each figure to the same advance width. */
+	font-variant-numeric: tabular-nums;
 	color: var(--accent);
 }
 
