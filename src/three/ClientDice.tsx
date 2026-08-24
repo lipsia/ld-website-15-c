@@ -1,9 +1,10 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { LD_PATH, LD_VIEWBOX } from "#/components/ui/ldPath";
 import type { ClientMark } from "#/types";
 import { PALETTE } from "./palette";
+import type { PolyFace } from "./polyhedron";
+import { buildEdges, buildPolyhedron, fibonacciDirections, relaxDirections } from "./polyhedron";
 
 /**
  * A twenty-sided die carrying the client logos: drag to spin it, click to burst the
@@ -15,12 +16,22 @@ import { PALETTE } from "./palette";
  * content. Two WebGL contexts is a cheap price for that separation.
  */
 
-/** Circumradius of the die body in world units. */
+/** Distance from the centre to each face plane, in world units. */
 const RADIUS = 1.55;
-/** Fraction of a face's edge length used for the logo tile. */
-const TILE_RATIO = 0.52;
-/** How far out the logos fly when burst open, as a multiple of RADIUS. */
-const SPREAD_RADIUS = 0.95;
+/**
+ * Logo square edge, as a multiple of the face's inradius.
+ *
+ * A value of 1.3 kept the square's corners inside the inscribed circle, but that wasted
+ * a third of every face: the textures already reserve ~12% padding of their own, and the
+ * marks are wide and short, so their corners are empty anyway. 1.8 lets the square
+ * overhang the circle while the visible ink still lands inside the face.
+ */
+const TILE_FIT = 1.8;
+/**
+ * Radius of the burst-open layout, as a multiple of RADIUS. Tied to TILE_FIT: enlarging
+ * the tiles without widening the layout by the same factor makes the logos collide.
+ */
+const SPREAD_RADIUS = 1.32;
 
 const BODY_OPACITY = 0.3;
 const DRAG_SENSITIVITY = 0.0085;
@@ -28,12 +39,6 @@ const DRAG_SENSITIVITY = 0.0085;
 const SPIN_FRICTION = 0.94;
 /** Idle drift so the die never looks frozen. */
 const IDLE_SPIN = 0.0022;
-
-interface Face {
-	readonly centre: THREE.Vector3;
-	readonly quaternion: THREE.Quaternion;
-	readonly size: number;
-}
 
 /** Mutable pointer state, shared from the DOM handlers into the render loop. */
 export interface DiceControls {
@@ -50,68 +55,6 @@ export interface DiceControls {
 
 export function createDiceControls(): DiceControls {
 	return { dragging: false, dx: 0, dy: 0, spinX: 0, spinY: 0, spreadTarget: 0 };
-}
-
-/**
- * Derives one oriented frame per icosahedron face.
- *
- * `IcosahedronGeometry` is non-indexed, so the position buffer is already grouped as
- * 20 consecutive triangles — which makes the face centroids and normals a straight
- * read rather than something that has to be rebuilt from an index.
- */
-function buildFaces(radius: number): { faces: Face[]; geometry: THREE.BufferGeometry } {
-	const geometry = new THREE.IcosahedronGeometry(radius, 0);
-	const position = geometry.getAttribute("position");
-	const faces: Face[] = [];
-
-	const a = new THREE.Vector3();
-	const b = new THREE.Vector3();
-	const c = new THREE.Vector3();
-	const forward = new THREE.Vector3(0, 0, 1);
-
-	for (let i = 0; i < position.count; i += 3) {
-		a.fromBufferAttribute(position, i);
-		b.fromBufferAttribute(position, i + 1);
-		c.fromBufferAttribute(position, i + 2);
-
-		const centre = new THREE.Vector3().add(a).add(b).add(c).divideScalar(3);
-		const normal = centre.clone().normalize();
-		const quaternion = new THREE.Quaternion().setFromUnitVectors(forward, normal);
-
-		faces.push({ centre, quaternion, size: a.distanceTo(b) * TILE_RATIO });
-	}
-
-	return { faces, geometry };
-}
-
-/**
- * Rasterises the LD monogram to a white-on-transparent texture.
- *
- * Faces beyond the client count carry Lipsia's own mark rather than a repeated client
- * logo — a duplicate would misrepresent the roster, and a bare face reads as missing
- * content. `Path2D` takes the same path string the DOM mark uses, so there is no
- * second copy of the artwork and no extra asset to ship.
- */
-function useMonogramTexture(): THREE.CanvasTexture | null {
-	return useMemo(() => {
-		if (typeof document === "undefined") return null;
-		const size = 512;
-		const canvas = document.createElement("canvas");
-		canvas.width = size;
-		canvas.height = size;
-		const ctx = canvas.getContext("2d");
-		if (!ctx) return null;
-
-		const scale = (size * 0.62) / LD_VIEWBOX;
-		ctx.translate((size - LD_VIEWBOX * scale) / 2, (size - LD_VIEWBOX * scale) / 2);
-		ctx.scale(scale, scale);
-		ctx.fillStyle = "#ffffff";
-		ctx.fill(new Path2D(LD_PATH));
-
-		const texture = new THREE.CanvasTexture(canvas);
-		texture.colorSpace = THREE.SRGBColorSpace;
-		return texture;
-	}, []);
 }
 
 /**
@@ -152,27 +95,49 @@ const scratchTarget = new THREE.Quaternion();
 const scratchInverse = new THREE.Quaternion();
 const scratchPos = new THREE.Vector3();
 const IDENTITY = new THREE.Quaternion();
+const FORWARD = new THREE.Vector3(0, 0, 1);
 
 function Dice({ marks, logos, controls, reducedMotion }: DiceProps) {
 	const groupRef = useRef<THREE.Group>(null);
 	const tileRefs = useRef<(THREE.Mesh | null)[]>([]);
 	const bodyRef = useRef<THREE.MeshPhysicalMaterial>(null);
 	const edgeRef = useRef<THREE.LineBasicMaterial>(null);
-	const monogramRefs = useRef<(THREE.MeshBasicMaterial | null)[]>([]);
 	const spread = useRef(0);
 	const { camera } = useThree();
 
-	const { faces, geometry } = useMemo(() => buildFaces(RADIUS), []);
-	const edges = useMemo(() => new THREE.EdgesGeometry(geometry), [geometry]);
-	const monogram = useMonogramTexture();
+	// One face per client: the solid is derived from the roster length, so the die is a
+	// d15 for fifteen clients and re-derives itself if that number ever changes.
+	const { faces, geometry } = useMemo(
+		() => buildPolyhedron(relaxDirections(fibonacciDirections(marks.length)), RADIUS),
+		[marks.length],
+	);
+	const edges = useMemo(() => buildEdges(faces), [faces]);
+
+	// A plane's default normal is +Z, so each tile needs the rotation that takes +Z onto
+	// its face normal. Derived once per face rather than per frame.
+	//
+	// One size for every tile, taken from the SMALLEST face: a derived solid has faces
+	// of slightly different areas, and scaling each logo to its own face would render
+	// some clients larger than others. On a client wall that reads as a ranking, so the
+	// tightest face sets the size and every logo matches.
+	const frames = useMemo(() => {
+		const smallest = faces.reduce(
+			(min: number, face: PolyFace) => Math.min(min, face.inradius),
+			Number.POSITIVE_INFINITY,
+		);
+		const size = Number.isFinite(smallest) ? smallest * TILE_FIT : 0.5;
+		return faces.map((face: PolyFace) => ({
+			quaternion: new THREE.Quaternion().setFromUnitVectors(FORWARD, face.normal),
+			size,
+		}));
+	}, [faces]);
 
 	useEffect(() => {
 		return () => {
 			geometry.dispose();
 			edges.dispose();
-			monogram?.dispose();
 		};
-	}, [geometry, edges, monogram]);
+	}, [geometry, edges]);
 
 	const targets = useMemo(
 		() => spreadTargets(marks.length, RADIUS * SPREAD_RADIUS),
@@ -238,9 +203,6 @@ function Dice({ marks, logos, controls, reducedMotion }: DiceProps) {
 		const shell = 1 - p;
 		if (bodyRef.current) bodyRef.current.opacity = BODY_OPACITY * shell;
 		if (edgeRef.current) edgeRef.current.opacity = 0.4 * shell;
-		for (const material of monogramRefs.current) {
-			if (material) material.opacity = 0.22 * shell;
-		}
 
 		// Facing the camera has to be expressed in the group's local frame, since the
 		// tiles are its children and it is itself rotating.
@@ -249,8 +211,9 @@ function Dice({ marks, logos, controls, reducedMotion }: DiceProps) {
 		for (let i = 0; i < marks.length; i++) {
 			const tile = tileRefs.current[i];
 			const face = faces[i];
+			const frame = frames[i];
 			const target = targets[i];
-			if (!tile || !face || !target) continue;
+			if (!tile || !face || !frame || !target) continue;
 
 			// Ease the outward flight so logos decelerate into place rather than stopping dead.
 			const eased = p * p * (3 - 2 * p);
@@ -258,11 +221,12 @@ function Dice({ marks, logos, controls, reducedMotion }: DiceProps) {
 			tile.position.copy(face.centre).lerp(scratchPos, eased);
 
 			scratchTarget.copy(scratchInverse).multiply(camera.quaternion);
-			tile.quaternion.copy(face.quaternion).slerp(scratchTarget, eased);
+			tile.quaternion.copy(frame.quaternion).slerp(scratchTarget, eased);
 
-			// Grow slightly on the way out — the cloud is further from the camera, so
-			// constant scale would read as the logos shrinking.
-			const scale = 1 + eased * 0.35;
+			// Grow a little on the way out — the cloud sits further from the camera, so a
+			// constant scale would read as the logos shrinking. Kept modest now that the
+			// face tiles are already large, or the outer ring clips the canvas.
+			const scale = 1 + eased * 0.12;
 			tile.scale.setScalar(scale);
 		}
 	});
@@ -289,8 +253,9 @@ function Dice({ marks, logos, controls, reducedMotion }: DiceProps) {
 
 			{marks.map((mark, index) => {
 				const face = faces[index];
+				const frame = frames[index];
 				const texture = logos[index];
-				if (!face || !texture) return null;
+				if (!face || !frame || !texture) return null;
 				return (
 					<mesh
 						key={mark.id}
@@ -299,10 +264,10 @@ function Dice({ marks, logos, controls, reducedMotion }: DiceProps) {
 						}}
 						// Lifted a hair off the facet so it never z-fights the body.
 						position={face.centre.clone().multiplyScalar(1.01)}
-						quaternion={face.quaternion}
+						quaternion={frame.quaternion}
 						renderOrder={2}
 					>
-						<planeGeometry args={[face.size, face.size]} />
+						<planeGeometry args={[frame.size, frame.size]} />
 						{/* Basic, not standard: these are emissive-looking marks, not lit
 						    surfaces, and toneMapped={false} keeps the white from going grey. */}
 						<meshBasicMaterial
@@ -315,33 +280,6 @@ function Dice({ marks, logos, controls, reducedMotion }: DiceProps) {
 					</mesh>
 				);
 			})}
-
-			{/* Faces left over once every client has one carry Lipsia's own mark. */}
-			{monogram &&
-				faces.slice(marks.length).map((face, index) => (
-					<mesh
-						key={`monogram-${face.centre
-							.toArray()
-							.map((n) => n.toFixed(3))
-							.join()}`}
-						position={face.centre.clone().multiplyScalar(1.01)}
-						quaternion={face.quaternion}
-						renderOrder={2}
-					>
-						<planeGeometry args={[face.size * 0.8, face.size * 0.8]} />
-						<meshBasicMaterial
-							ref={(node) => {
-								monogramRefs.current[index] = node;
-							}}
-							map={monogram}
-							transparent
-							opacity={0.22}
-							toneMapped={false}
-							side={THREE.FrontSide}
-							depthWrite={false}
-						/>
-					</mesh>
-				))}
 		</group>
 	);
 }

@@ -117,14 +117,13 @@ export function Clients({ policy }: { policy: RenderPolicy }) {
 							</ErrorBoundary>
 						</div>
 
-						<div className="dice__controls">
-							{/* The die is pointer-only, so the same action needs a real control
-							    that keyboard and assistive tech can reach. */}
-							<button type="button" className="btn btn--ghost" onClick={toggle}>
-								{open ? "Collect logos" : "Spread out logos"}
-							</button>
-							<p className="dice__hint">Drag to spin · click to open</p>
-						</div>
+						{/* The die responds to pointers only, so the same action still needs a
+						    control keyboard and assistive tech can reach. Kept out of sight until
+						    it is focused — the same trick the skip link uses — so the section
+						    stays clean without the interaction becoming mouse-only. */}
+						<button type="button" className="dice__toggle" onClick={toggle}>
+							{open ? "Collect client logos" : "Spread out client logos"}
+						</button>
 
 						{/* The roster as real text. The canvas can express it visually but not
 						    semantically, so the names are published here regardless. */}
