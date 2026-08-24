@@ -38,6 +38,12 @@ describe("site.ts content contract", () => {
 				expect(id).toMatch(KEBAB_CASE_PATTERN);
 			});
 		});
+
+		it("CLIENTS.marks logo paths match the expected convention", () => {
+			CLIENTS.marks.forEach((mark) => {
+				expect(mark.logo).toBe(`/assets/clients/${mark.id}.png`);
+			});
+		});
 	});
 
 	describe("Collection lengths are correct", () => {
@@ -53,8 +59,8 @@ describe("site.ts content contract", () => {
 			expect(TECH.stats.length).toBe(2);
 		});
 
-		it("CLIENTS.marks has length 12", () => {
-			expect(CLIENTS.marks.length).toBe(12);
+		it("CLIENTS.marks has length 15", () => {
+			expect(CLIENTS.marks.length).toBe(15);
 		});
 	});
 

@@ -2,6 +2,14 @@
 
 Single-page marketing site for lipsia.digital. Centrepiece is the LD logo as a GPU particle system (three.js + React 19).
 
+## Setup
+
+- Node is pinned by `.nvmrc` (24). pnpm comes from corepack, pinned by the
+  `packageManager` field — never install pnpm directly.
+- `pnpm: command not found` after switching Node version means corepack's shim is
+  missing for that install (they are per-Node-version): `corepack enable pnpm`, and if
+  that is silent, add `--install-directory "$(dirname "$(which node)")"`.
+
 ## Commands
 
 - `pnpm dev` — Start dev server (Vite)

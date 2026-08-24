@@ -24,8 +24,21 @@ A single-page, scroll-driven WebGL experience for lipsia.digital. The centrepiec
 
 ### Prerequisites
 
-- **Node.js** >= 20.19 (see `.nvmrc`)
-- pnpm 11.23+ (the repo pins it via the `packageManager` field; `corepack enable` picks it up automatically)
+- **Node.js** >= 22.13 — `.nvmrc` pins Node 24, which is also what CI uses.
+- **pnpm 11.23+**, supplied by corepack. The version is pinned by the `packageManager`
+  field in `package.json`, so you never install pnpm directly.
+
+```bash
+fnm use                      # or nvm use — picks up .nvmrc
+corepack enable pnpm         # once per Node version you use
+```
+
+> **`zsh: command not found: pnpm`?** Corepack installs its shims *per Node
+> installation*, so switching Node version (or installing a new patch release) leaves
+> you without a `pnpm` on `PATH` even though corepack itself is present. Re-run
+> `corepack enable pnpm` for the version you just switched to. If corepack is silent
+> and no shim appears, pass the directory explicitly:
+> `corepack enable --install-directory "$(dirname "$(which node)")" pnpm`.
 
 ### Installation
 

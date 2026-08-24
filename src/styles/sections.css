@@ -536,58 +536,94 @@ section {
 	margin-inline: auto;
 }
 
-/* === Marquee === */
+/* === Clients: the d20 and its flat fallback === */
 
-.marquee {
-	overflow: hidden;
-	margin-block-start: var(--space-xl);
+.dice {
+	position: relative;
+	/* Square-ish so the die has room to burst open without clipping its cloud. */
+	block-size: clamp(20rem, 46vw, 34rem);
+	inline-size: 100%;
+	cursor: grab;
+	/*
+	 * A soft radial well behind the die. Without it the page's own particle logo and
+	 * backdrop sit directly behind the client logos and the two read as one noisy
+	 * field — the logos are fine white line art and lose badly to it. The gradient
+	 * falls off to fully transparent, so the background animation is still visible
+	 * around the edges of the section rather than being boxed out.
+	 */
+	background: radial-gradient(
+		ellipse closest-side at 50% 50%,
+		rgb(5 4 15 / 92%) 0%,
+		rgb(5 4 15 / 74%) 45%,
+		rgb(5 4 15 / 0%) 100%
+	);
+	/* Vertical panning must still scroll the page on touch; only horizontal drags are
+	   claimed by the die. Without this the section becomes a scroll trap on mobile. */
+	touch-action: pan-y;
 }
 
-.marquee__track {
+.dice:active {
+	cursor: grabbing;
+}
+
+.dice canvas {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+}
+
+.dice__controls {
 	display: flex;
-	width: max-content;
-	gap: var(--space-m);
-	animation: marquee-scroll linear infinite;
-}
-
-.marquee:focus-within .marquee__track,
-.marquee:hover .marquee__track {
-	animation-play-state: paused;
-}
-
-.marquee__group {
-	display: flex;
-	gap: var(--space-m);
-}
-
-.marquee__item {
-	display: inline-flex;
+	flex-wrap: wrap;
 	align-items: center;
-	padding: var(--space-xs) var(--space-l);
-	border: 1px solid var(--line-hard);
-	border-radius: var(--radius-pill);
-	color: var(--text-mid);
-	font-size: var(--step-0);
-	white-space: nowrap;
+	gap: var(--space-m);
+	margin-block-start: var(--space-m);
 }
 
-@keyframes marquee-scroll {
-	from {
-		transform: translateX(0);
-	}
-	to {
-		transform: translateX(-50%);
-	}
+.dice__hint {
+	margin: 0;
+	font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+	font-size: var(--step--1);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--text-lo);
 }
 
-@media (prefers-reduced-motion: reduce) {
-	.marquee {
-		overflow-x: auto;
-	}
+/* Flat roster: the fallback when WebGL is unavailable, and the Suspense placeholder
+   while the die's chunk and textures load. */
+.logo-wall {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr));
+	gap: var(--space-m);
+	align-items: center;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
 
-	.marquee__track {
-		animation: none;
-	}
+.logo-wall li {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--space-m);
+	border: 1px solid var(--line-soft);
+	border-radius: var(--radius-m);
+	background: rgb(255 255 255 / 3%);
+}
+
+.logo-wall img {
+	inline-size: 100%;
+	block-size: auto;
+	max-block-size: 3rem;
+	object-fit: contain;
+	/* The textures are white-on-transparent, so they need dimming rather than
+	   inverting to sit calmly against the panel. */
+	opacity: 0.75;
+	transition: opacity var(--dur-mid) var(--ease-out-expo);
+}
+
+.logo-wall li:hover img {
+	opacity: 1;
 }
 
 /* === CTA === */

@@ -61,7 +61,7 @@ export function App() {
 				<Competence />
 				<Services />
 				<Tech />
-				<Clients />
+				<Clients policy={policy} />
 				<CTA />
 			</main>
 

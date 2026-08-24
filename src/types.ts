@@ -36,6 +36,8 @@ export interface StatItem {
 export interface ClientMark {
 	readonly id: string;
 	readonly name: string;
+	/** Path to the client's white-on-transparent logo texture, served from /public. */
+	readonly logo: string;
 }
 
 export interface NavLink {
