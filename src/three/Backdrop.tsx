@@ -1,8 +1,8 @@
-import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
-import * as THREE from 'three';
-import { scrollStore } from '../scroll/scrollStore';
-import { PALETTE, toVec3 } from './palette';
+import { useFrame } from "@react-three/fiber";
+import { useEffect, useMemo, useRef } from "react";
+import * as THREE from "three";
+import { scrollStore } from "#/scroll/scrollStore";
+import { PALETTE, toVec3 } from "./palette";
 
 const RADIUS = 60;
 
@@ -61,41 +61,41 @@ const FRAGMENT_SHADER = /* glsl */ `
  * so nothing needs to depth-test against it.
  */
 export function Backdrop() {
-  const elapsed = useRef(0);
+	const elapsed = useRef(0);
 
-  const geometry = useMemo(() => new THREE.SphereGeometry(RADIUS, 32, 32), []);
-  const material = useMemo(
-    () =>
-      new THREE.ShaderMaterial({
-        vertexShader: VERTEX_SHADER,
-        fragmentShader: FRAGMENT_SHADER,
-        uniforms: {
-          uTime: { value: 0 },
-          uScroll: { value: 0 },
-          uSurface: { value: new THREE.Vector3(...SURFACE) },
-          uIndigo: { value: new THREE.Vector3(...INDIGO) },
-          uViolet: { value: new THREE.Vector3(...VIOLET) },
-        },
-        side: THREE.BackSide,
-        depthWrite: false,
-      }),
-    [],
-  );
+	const geometry = useMemo(() => new THREE.SphereGeometry(RADIUS, 32, 32), []);
+	const material = useMemo(
+		() =>
+			new THREE.ShaderMaterial({
+				vertexShader: VERTEX_SHADER,
+				fragmentShader: FRAGMENT_SHADER,
+				uniforms: {
+					uTime: { value: 0 },
+					uScroll: { value: 0 },
+					uSurface: { value: new THREE.Vector3(...SURFACE) },
+					uIndigo: { value: new THREE.Vector3(...INDIGO) },
+					uViolet: { value: new THREE.Vector3(...VIOLET) },
+				},
+				side: THREE.BackSide,
+				depthWrite: false,
+			}),
+		[],
+	);
 
-  useEffect(() => {
-    return () => {
-      geometry.dispose();
-      material.dispose();
-    };
-  }, [geometry, material]);
+	useEffect(() => {
+		return () => {
+			geometry.dispose();
+			material.dispose();
+		};
+	}, [geometry, material]);
 
-  useFrame((_state, delta) => {
-    elapsed.current += delta;
-    const timeUniform = material.uniforms.uTime;
-    const scrollUniform = material.uniforms.uScroll;
-    if (timeUniform) timeUniform.value = elapsed.current;
-    if (scrollUniform) scrollUniform.value = scrollStore.get();
-  });
+	useFrame((_state, delta) => {
+		elapsed.current += delta;
+		const timeUniform = material.uniforms.uTime;
+		const scrollUniform = material.uniforms.uScroll;
+		if (timeUniform) timeUniform.value = elapsed.current;
+		if (scrollUniform) scrollUniform.value = scrollStore.get();
+	});
 
-  return <mesh geometry={geometry} material={material} renderOrder={-1} />;
+	return <mesh geometry={geometry} material={material} renderOrder={-1} />;
 }

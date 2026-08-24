@@ -1,24 +1,24 @@
-import type { RefObject } from 'react';
-import { useEffect, useRef, useState } from 'react';
-import type { SceneStage } from '../types';
-import { scrollStore } from './scrollStore';
+import type { RefObject } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { SceneStage } from "#/types";
+import { scrollStore } from "./scrollStore";
 
 /** Stage boundaries in ascending order; upper bound is exclusive except the last. */
 const STAGE_RANGES: ReadonlyArray<readonly [SceneStage, number, number]> = [
-  ['nebula', 0, 0.18],
-  ['convergence', 0.18, 0.4],
-  ['crystallised', 0.4, 0.62],
-  ['dissection', 0.62, 0.85],
-  ['dispersal', 0.85, 1],
+	["nebula", 0, 0.18],
+	["convergence", 0.18, 0.4],
+	["crystallised", 0.4, 0.62],
+	["dissection", 0.62, 0.85],
+	["dispersal", 0.85, 1],
 ];
 
 function stageForProgress(progress: number): SceneStage {
-  for (const [stage, start, end] of STAGE_RANGES) {
-    if (progress < end || end === 1) {
-      if (progress >= start) return stage;
-    }
-  }
-  return 'nebula';
+	for (const [stage, start, end] of STAGE_RANGES) {
+		if (progress < end || end === 1) {
+			if (progress >= start) return stage;
+		}
+	}
+	return "nebula";
 }
 
 /**
@@ -27,17 +27,17 @@ function stageForProgress(progress: number): SceneStage {
  * re-render the entire tree every frame for no visual benefit.
  */
 export function useScrollValue(): RefObject<number> {
-  const ref = useRef(scrollStore.get());
+	const ref = useRef(scrollStore.get());
 
-  useEffect(
-    () =>
-      scrollStore.subscribe((progress) => {
-        ref.current = progress;
-      }),
-    [],
-  );
+	useEffect(
+		() =>
+			scrollStore.subscribe((progress) => {
+				ref.current = progress;
+			}),
+		[],
+	);
 
-  return ref;
+	return ref;
 }
 
 /**
@@ -46,22 +46,22 @@ export function useScrollValue(): RefObject<number> {
  * class names / ARIA state off this without paying a per-frame render cost.
  */
 export function useScrollStage(): SceneStage {
-  const [stage, setStage] = useState<SceneStage>(() => stageForProgress(scrollStore.get()));
-  const stageRef = useRef(stage);
+	const [stage, setStage] = useState<SceneStage>(() => stageForProgress(scrollStore.get()));
+	const stageRef = useRef(stage);
 
-  useEffect(
-    () =>
-      scrollStore.subscribe((progress) => {
-        const next = stageForProgress(progress);
-        if (next !== stageRef.current) {
-          stageRef.current = next;
-          setStage(next);
-        }
-      }),
-    [],
-  );
+	useEffect(
+		() =>
+			scrollStore.subscribe((progress) => {
+				const next = stageForProgress(progress);
+				if (next !== stageRef.current) {
+					stageRef.current = next;
+					setStage(next);
+				}
+			}),
+		[],
+	);
 
-  return stage;
+	return stage;
 }
 
 /**
@@ -73,23 +73,23 @@ export function useScrollStage(): SceneStage {
  * never inside a loop.
  */
 export function useElementProgress(ref: RefObject<HTMLElement | null>): RefObject<number> {
-  const progressRef = useRef(0);
+	const progressRef = useRef(0);
 
-  useEffect(
-    () =>
-      scrollStore.subscribe(() => {
-        const el = ref.current;
-        if (!el || typeof window === 'undefined') return;
+	useEffect(
+		() =>
+			scrollStore.subscribe(() => {
+				const el = ref.current;
+				if (!el || typeof window === "undefined") return;
 
-        const rect = el.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const total = rect.height + viewportHeight;
-        const traveled = viewportHeight - rect.top;
-        const next = total > 0 ? traveled / total : 0;
-        progressRef.current = next < 0 ? 0 : next > 1 ? 1 : next;
-      }),
-    [ref],
-  );
+				const rect = el.getBoundingClientRect();
+				const viewportHeight = window.innerHeight;
+				const total = rect.height + viewportHeight;
+				const traveled = viewportHeight - rect.top;
+				const next = total > 0 ? traveled / total : 0;
+				progressRef.current = next < 0 ? 0 : next > 1 ? 1 : next;
+			}),
+		[ref],
+	);
 
-  return progressRef;
+	return progressRef;
 }

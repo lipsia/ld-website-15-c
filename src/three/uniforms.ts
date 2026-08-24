@@ -14,22 +14,16 @@
  * to `| undefined` under `noUncheckedIndexedAccess`.
  */
 
-import type * as THREE from 'three';
+import type * as THREE from "three";
 
 /** Sets a numeric uniform on the material. No-ops if the shader has no such uniform. */
 export function setUniform(material: THREE.ShaderMaterial, name: string, value: number): void {
-  const uniform = material.uniforms[name];
-  if (uniform) uniform.value = value;
+	const uniform = material.uniforms[name];
+	if (uniform) uniform.value = value;
 }
 
 /** Reads a numeric uniform back, falling back to `fallback` when absent. */
 export function getUniform(material: THREE.ShaderMaterial, name: string, fallback = 0): number {
-  const uniform = material.uniforms[name];
-  return typeof uniform?.value === 'number' ? uniform.value : fallback;
-}
-
-/** Adds to a numeric uniform — the common case for an accumulating time value. */
-export function addUniform(material: THREE.ShaderMaterial, name: string, delta: number): void {
-  const uniform = material.uniforms[name];
-  if (uniform && typeof uniform.value === 'number') uniform.value += delta;
+	const uniform = material.uniforms[name];
+	return typeof uniform?.value === "number" ? uniform.value : fallback;
 }

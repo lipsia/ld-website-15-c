@@ -1,0 +1,6 @@
+# pnpm blocks dependency build scripts by default. Only the packages that
+# genuinely need to compile a native/platform binary are allowed here.
+allowBuilds:
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@types/react-dom@19.2.5'

@@ -12,7 +12,7 @@ structural analogue of Oxigen's tree.
 
 | Concern | Choice | Rationale |
 |---|---|---|
-| Build | **Vite 7** + TypeScript (strict) | Fast HMR, native ESM, first-class code splitting |
+| Build | **Vite 8** + TypeScript (strict) | Fast HMR, native ESM, first-class code splitting |
 | UI | **React 19** | Concurrent rendering; `useTransition` for scene handoff |
 | 3D | **three** + **@react-three/fiber** | Declarative scene graph, reconciler-driven |
 | 3D helpers | **@react-three/drei** | `Environment`, `useTexture`, `Float`, perf helpers |
@@ -20,6 +20,7 @@ structural analogue of Oxigen's tree.
 | Scroll | **lenis** | Sub-pixel smooth scroll; single RAF source shared with R3F |
 | DOM motion | **motion** (Framer Motion 12) | Declarative reveals, respects reduced-motion |
 | Lint/Format | **Biome 2** | Single fast toolchain, replaces ESLint + Prettier |
+| Package manager | **pnpm 11** | Pinned via `packageManager`; matches the sibling `grundstock-frontend` repo |
 | Tests | **Vitest** + Testing Library | Unit tests for hooks/utils/content integrity |
 | Deploy | Static SPA + security headers | No server runtime → minimal attack surface |
 
@@ -39,7 +40,7 @@ stylized `L` + `D`. This is the seed geometry for a three-stage morph.
 ```
 ld-logo.svg path
   │
-  ├─► SVGLoader.createShapes() ──► ExtrudeGeometry (depth, bevel)
+  ├─► ShapePath.toShapes() ──────► ExtrudeGeometry (depth, bevel)
   │        └─► solid "monolith" mesh: MeshPhysicalMesh, clearcoat + iridescence
   │
   └─► MeshSurfaceSampler over the extruded geometry
@@ -104,7 +105,7 @@ src/
 │   ├── Scene.tsx                        ← canvas root, DPR + perf policy
 │   ├── LogoParticles.tsx                ← THE hero object (team lead)
 │   ├── logoGeometry.ts                  ← SVG → extrude → sample
-│   ├── shaders/logo.vert|frag
+│   ├── shaders/logoShader.ts             ← GLSL as tagged template strings
 │   ├── ParticleField.tsx, Backdrop.tsx  ← ambient depth layers
 │   └── Effects.tsx                      ← postprocessing chain
 ├── scroll/           ScrollProvider.tsx, useScrollProgress.ts   ← Lenis, ref-based
@@ -128,7 +129,7 @@ React state. DOM reveals use IntersectionObserver; the 3D scene reads the ref in
 - Zero `dangerouslySetInnerHTML`; zero `eval`; all external links `rel="noopener noreferrer"`.
 - All assets self-hosted (fonts included) — no third-party origins at runtime.
 - No secrets in the repo; `.env.example` documents build-time-only public vars.
-- `npm audit` clean; exact-pinned deps; lockfile committed.
+- `pnpm audit --prod` clean; exact-pinned deps; `pnpm-lock.yaml` committed.
 - A11y: semantic landmarks, visible focus rings, skip link, `aria-hidden` on the
   decorative canvas, full `prefers-reduced-motion` static fallback, AA contrast.
 - SEO: unique title/description, Open Graph, Twitter card, JSON-LD `Organization`.

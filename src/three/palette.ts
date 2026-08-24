@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 /**
  * Brand palette for the WebGL layer.
@@ -6,11 +6,11 @@ import * as THREE from 'three';
  * Values are linear-space-safe sRGB hex; three.js converts on assignment.
  */
 export const PALETTE = {
-  indigo: '#312782',
-  violet: '#5f27d4',
-  mint: '#1ed5a4',
-  coral: '#ff583c',
-  surface: '#05040f',
+	indigo: "#312782",
+	violet: "#5f27d4",
+	mint: "#1ed5a4",
+	coral: "#ff583c",
+	surface: "#05040f",
 } as const;
 
 /**
@@ -27,6 +27,6 @@ export const PALETTE = {
  * ColorManagement, so this stays correct if the renderer's spaces are ever changed.
  */
 export function toVec3(hex: string): [number, number, number] {
-  const color = new THREE.Color().setStyle(hex, THREE.SRGBColorSpace);
-  return [color.r, color.g, color.b];
+	const color = new THREE.Color().setStyle(hex, THREE.SRGBColorSpace);
+	return [color.r, color.g, color.b];
 }

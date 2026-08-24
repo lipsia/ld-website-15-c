@@ -1,0 +1,62 @@
+{
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[css]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"editor.codeActionsOnSave": {
+		"source.organizeImports.biome": "explicit"
+	},
+
+	"window.title": "LIPSIA DIGITAL WEBSITE",
+
+	// With the new modern UI the bars that we color are forced to be transparent, so we disable it for now
+	"workbench.experimental.modernUI": false,
+
+	// Teal — the backend is violet, the frontend is olive, so this is clearly distinct
+	"workbench.colorCustomizations": {
+		// Top: title bar
+		"titleBar.activeBackground": "#17a37d",
+		"titleBar.activeForeground": "#ffffff",
+		"titleBar.inactiveBackground": "#0f6b52",
+		"titleBar.inactiveForeground": "#5ff2c8",
+		"titleBar.border": "#1ed5a4",
+
+		// Top: command centre
+		"commandCenter.background": "#1ed5a466",
+		"commandCenter.foreground": "#ffffff",
+		"commandCenter.border": "#5ff2c8",
+		"commandCenter.activeBackground": "#1ed5a4",
+		"commandCenter.activeBorder": "#5ff2c8",
+
+		// Left: activity bar
+		"activityBar.background": "#0f6b52",
+		"activityBar.foreground": "#ffffff",
+		"activityBar.inactiveForeground": "#5ff2c8b3",
+		"activityBar.activeBorder": "#5ff2c8",
+		"activityBarBadge.background": "#5ff2c8",
+		"activityBarBadge.foreground": "#052b20",
+
+		// Bottom: status bar
+		"statusBar.background": "#17a37d",
+		"statusBar.foreground": "#ffffff",
+		"statusBar.border": "#1ed5a4",
+		"statusBarItem.hoverBackground": "#1ed5a4"
+	}
+}

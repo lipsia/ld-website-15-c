@@ -26,13 +26,13 @@ A single-page, scroll-driven WebGL experience for lipsia.digital. The centrepiec
 ### Prerequisites
 
 - **Node.js** >= 20.19 (see `.nvmrc`)
-- npm (v10+)
+- pnpm 11.23+ (the repo pins it via the `packageManager` field; `corepack enable` picks it up automatically)
 
 ### Installation
 
 ```bash
-npm ci
-npm run dev
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
 The app launches on `http://localhost:5173` with HMR enabled.
@@ -41,16 +41,17 @@ The app launches on `http://localhost:5173` with HMR enabled.
 
 | Script | Purpose |
 |---|---|
-| `npm run dev` | Start dev server with HMR |
-| `npm run build` | Type-check and build for production (outputs to `dist/`) |
-| `npm run preview` | Preview the production build locally |
-| `npm run lint` | Run Biome linter on all source files |
-| `npm run lint:fix` | Run Biome linter and auto-fix issues |
-| `npm run format` | Format code with Biome |
-| `npm run typecheck` | Run TypeScript type checker in strict mode |
-| `npm run test` | Run all tests once |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run audit` | Audit production dependencies for security issues |
+| `pnpm dev` | Start dev server with HMR |
+| `pnpm build` | Type-check and build for production (outputs to `dist/`) |
+| `pnpm preview` | Preview the production build locally |
+| `pnpm lint` | Run the Biome linter |
+| `pnpm check` | Run Biome lint + format checks (what CI runs) |
+| `pnpm check:fix` | Run Biome checks and apply safe fixes |
+| `pnpm format` | Format code with Biome |
+| `pnpm typecheck` | Run TypeScript type checker in strict mode |
+| `pnpm test` | Run all tests once |
+| `pnpm test:watch` | Run tests in watch mode |
+| `pnpm audit` | Audit production dependencies for security issues |
 
 ## Project Structure
 
@@ -120,7 +121,7 @@ src/
 - **Headers**: Production headers set `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (deny camera/mic/geo/payment/usb), `Cross-Origin-Opener-Policy: same-origin`, and `X-DNS-Prefetch-Control: off`.
 - **No Secrets**: `.env` is not committed; only public build-time vars exist (prefixed `VITE_`).
 - **Self-Hosted Assets**: All fonts, images, and stylesheets are served locally. No third-party CDN origins.
-- **Audit**: `npm audit` runs in CI and must pass; dependencies are exact-pinned and lockfile is committed.
+- **Audit**: `pnpm audit --prod` runs clean and must pass; dependencies are exact-pinned and lockfile is committed.
 
 ## Browser Support
 
@@ -132,7 +133,7 @@ src/
 
 This is a static single-page application (SPA). To deploy:
 
-1. Run `npm run build` to generate `dist/`.
+1. Run `pnpm build` to generate `dist/`.
 2. Upload `dist/` to your static hosting platform.
 3. **Critical**: Ensure `public/_headers` is deployed:
    - On **Netlify** and **Cloudflare Pages**: The `_headers` file is automatically picked up and applied.

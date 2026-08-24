@@ -12,37 +12,37 @@
 export type ScrollListener = (progress: number) => void;
 
 export interface ScrollStore {
-  /** Current document scroll progress, 0..1. Cheap; safe to call per frame. */
-  get(): number;
-  /** Current scroll velocity in px/frame, smoothed. */
-  getVelocity(): number;
-  /** Write progress + velocity. Called only by the scroll provider. */
-  set(progress: number, velocity: number): void;
-  /** Subscribe to changes. Returns an unsubscribe function. */
-  subscribe(listener: ScrollListener): () => void;
+	/** Current document scroll progress, 0..1. Cheap; safe to call per frame. */
+	get(): number;
+	/** Current scroll velocity in px/frame, smoothed. */
+	getVelocity(): number;
+	/** Write progress + velocity. Called only by the scroll provider. */
+	set(progress: number, velocity: number): void;
+	/** Subscribe to changes. Returns an unsubscribe function. */
+	subscribe(listener: ScrollListener): () => void;
 }
 
 function createScrollStore(): ScrollStore {
-  let progress = 0;
-  let velocity = 0;
-  const listeners = new Set<ScrollListener>();
+	let progress = 0;
+	let velocity = 0;
+	const listeners = new Set<ScrollListener>();
 
-  return {
-    get: () => progress,
-    getVelocity: () => velocity,
-    set(next, nextVelocity) {
-      // Clamp defensively: Lenis can overshoot during rubber-banding.
-      progress = next < 0 ? 0 : next > 1 ? 1 : next;
-      velocity = nextVelocity;
-      for (const listener of listeners) listener(progress);
-    },
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-  };
+	return {
+		get: () => progress,
+		getVelocity: () => velocity,
+		set(next, nextVelocity) {
+			// Clamp defensively: Lenis can overshoot during rubber-banding.
+			progress = next < 0 ? 0 : next > 1 ? 1 : next;
+			velocity = nextVelocity;
+			for (const listener of listeners) listener(progress);
+		},
+		subscribe(listener) {
+			listeners.add(listener);
+			return () => {
+				listeners.delete(listener);
+			};
+		},
+	};
 }
 
 /** App-wide singleton. One document, one scroll position. */
@@ -53,7 +53,7 @@ export const scrollStore = createScrollStore();
  * Used to give each scene stage its own local timeline.
  */
 export function subProgress(progress: number, start: number, end: number): number {
-  if (end <= start) return 0;
-  const t = (progress - start) / (end - start);
-  return t < 0 ? 0 : t > 1 ? 1 : t;
+	if (end <= start) return 0;
+	const t = (progress - start) / (end - start);
+	return t < 0 ? 0 : t > 1 ? 1 : t;
 }
