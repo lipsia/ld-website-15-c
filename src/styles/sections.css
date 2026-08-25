@@ -24,7 +24,10 @@ section {
 
 .section-head {
 	max-width: var(--measure);
-	margin-block-end: var(--space-2xl);
+	/* Deliberately much smaller than the --space-3xl that separates one section from
+	   the next. A title has to read as belonging to the block under it, and at 2xl the
+	   two were close enough (96 vs 144) that the heading floated between them instead. */
+	margin-block-end: var(--space-l);
 }
 
 .section-head h2 {
