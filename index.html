@@ -46,6 +46,20 @@
       name="description"
       content="Successfully implement transformations and shape the future with digital solutions. Software Engineering, Information Systems and Digital Products from Leipzig."
     />
+    <!--
+      Same override as global.css `@media (scripting: none)`, for browsers that do not
+      support that media feature yet. Neither helps if JS is enabled but fails to load;
+      making Reveal render visible and animate down from there would fix that case too,
+      but at the cost of content visibly disappearing before it fades back in.
+    -->
+    <noscript>
+      <style>
+        [data-reveal] {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      </style>
+    </noscript>
   </head>
   <body>
     <div id="root"></div>

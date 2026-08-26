@@ -19,6 +19,11 @@ export function Reveal({ children, delay = 0, y = 24, className }: RevealProps) 
 
 	return (
 		<motion.div
+			// Marks the element whose hidden initial state is baked into the prerendered
+			// HTML, so global.css can force it visible where scripting is unavailable.
+			// Without that override the build ships headings at opacity 0 that nothing
+			// will ever animate in. See global.css `@media (scripting: none)`.
+			data-reveal=""
 			{...(className !== undefined ? { className } : {})}
 			initial={{ opacity: 0, y: offset }}
 			whileInView={{ opacity: 1, y: 0 }}

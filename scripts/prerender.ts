@@ -11,7 +11,7 @@
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { locales, localizeHref, render } from "../dist-ssr/entry-server.js";
+import { baseLocale, locales, localizeHref, render } from "../dist-ssr/entry-server.js";
 
 const root = resolve(import.meta.dirname, "..");
 const dist = join(root, "dist");
@@ -48,6 +48,8 @@ function outputPath(localised: string): string {
 
 let written = 0;
 const emitted: string[] = [];
+/** Every file written, so the CSP check below covers all of them — 404.html included. */
+const writtenFiles: string[] = [];
 
 for (const locale of locales) {
 	for (const route of ROUTES) {
@@ -84,10 +86,32 @@ for (const locale of locales) {
 		await writeFile(file, html, "utf8");
 		written++;
 		emitted.push(localised);
+		writtenFiles.push(file);
 	}
 }
 
 console.log(`prerendered ${written} documents: ${emitted.join(", ")}`);
+
+// --- 404, for the static host to serve when no file matches
+//
+// One document only: a host has a single 404 page and no way to negotiate a language
+// for it, so it is rendered in the base locale. Client-side navigation to a bad path is
+// handled separately by the root route's notFoundComponent, which does follow the
+// active locale. Deliberately NOT added to the sitemap.
+{
+	const rendered = await render("/__not_found__", baseLocale as "de" | "en");
+	const { head, body } = liftHoistables(rendered);
+	const html = template
+		.replace(/<html lang="[^"]*">/, `<html lang="${baseLocale}">`)
+		.replace('<div id="root"></div>', `<div id="root">${body}</div>`)
+		.replace("</head>", `${head}</head>`)
+		.replace(/\s*<title>[^<]*<\/title>/, "")
+		.replace(/\s*<meta\s+name="description"[^>]*>/, "");
+	const file = join(dist, "404.html");
+	await writeFile(file, html, "utf8");
+	writtenFiles.push(file);
+	console.log(`wrote 404.html (${baseLocale})`);
+}
 
 // --- sitemap, generated from the same route x locale product that produced the files
 //
@@ -124,8 +148,7 @@ console.log(`generated sitemap.xml with ${ROUTES.length * locales.length} urls`)
  * that renders and then does nothing — a failure that is easy to miss in review and
  * impossible to miss here.
  */
-for (const localised of emitted) {
-	const file = join(dist, outputPath(localised));
+for (const file of writtenFiles) {
 	const html = await readFile(file, "utf8");
 	// Only EXECUTABLE inline scripts matter. `application/ld+json` is a data block:
 	// browsers never execute it, and CSP's script-src does not apply to it, so our
@@ -137,10 +160,10 @@ for (const localised of emitted) {
 	];
 	if (inline.length > 0) {
 		throw new Error(
-			`prerender: ${localised} contains ${inline.length} inline <script> tag(s), which the CSP forbids: ${inline
+			`prerender: ${file} contains ${inline.length} inline <script> tag(s), which the CSP forbids: ${inline
 				.map((match) => match[0])
 				.join(" ")}`,
 		);
 	}
 }
-console.log("CSP check: no inline scripts in any prerendered document");
+console.log(`CSP check: no inline scripts in any of ${writtenFiles.length} documents`);

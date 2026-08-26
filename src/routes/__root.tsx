@@ -1,6 +1,7 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { Footer } from "#/components/Footer";
 import { Nav } from "#/components/Nav";
+import { NotFound } from "#/components/NotFound";
 import { m } from "#/paraglide/messages";
 import { ScrollProvider } from "#/scroll/ScrollProvider";
 
@@ -30,4 +31,9 @@ function RootLayout() {
 	);
 }
 
-export const Route = createRootRoute({ component: RootLayout });
+export const Route = createRootRoute({
+	component: RootLayout,
+	// Applies to every unmatched path, so the shell (nav, footer, skip link) still
+	// frames a real message instead of an empty <main>.
+	notFoundComponent: NotFound,
+});

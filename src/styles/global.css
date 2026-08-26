@@ -157,6 +157,21 @@ a {
 	color: var(--surface-0);
 }
 
+/* === No scripting ===
+   Every document is prerendered, so the HTML carries Reveal's *hidden* initial state
+   (opacity: 0) — correct while JS is coming, fatal if it never arrives. Verified case:
+   /team without JS showed its body text and no heading at all.
+   Inline styles win over stylesheets, hence !important. */
+@media (scripting: none) {
+	[data-reveal] {
+		/* biome-ignore-start lint/complexity/noImportantStyles: motion writes the hidden
+		   state as an inline style, which a stylesheet rule cannot otherwise override. */
+		opacity: 1 !important;
+		transform: none !important;
+		/* biome-ignore-end lint/complexity/noImportantStyles: see above */
+	}
+}
+
 /* === Reduced motion === */
 
 @media (prefers-reduced-motion: reduce) {

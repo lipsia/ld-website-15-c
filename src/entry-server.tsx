@@ -38,4 +38,4 @@ export async function render(localisedPath: string, locale: "de" | "en"): Promis
  * the generated runtime a second time through a different module graph — two copies
  * would each hold their own locale state.
  */
-export { locales, localizeHref } from "./paraglide/runtime";
+export { baseLocale, locales, localizeHref } from "./paraglide/runtime";

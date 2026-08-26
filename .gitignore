@@ -46,3 +46,6 @@ coverage/
 
 # generated i18n output (built by the Paraglide vite plugin / prepare hook)
 src/paraglide
+
+# TanStack Router plugin scratch dir
+.tanstack
