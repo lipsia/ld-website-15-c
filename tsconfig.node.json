@@ -7,6 +7,10 @@
 		"types": ["node"],
 		"skipLibCheck": true,
 		"noEmit": true,
+		// scripts/compile-i18n.ts imports paraglide.config.ts by its real extension,
+		// because Node runs these files directly with type stripping rather than through
+		// a bundler that could resolve an extensionless specifier.
+		"allowImportingTsExtensions": true,
 		"isolatedModules": true,
 		"moduleDetection": "force",
 		"verbatimModuleSyntax": true,
@@ -14,5 +18,9 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true
 	},
-	"include": ["vite.config.ts", "vitest.config.ts"]
+	"include": ["vite.config.ts", "vitest.config.ts", "paraglide.config.ts", "scripts/**/*.ts"],
+	// prerender.ts imports dist-ssr/, which by definition does not exist until the
+	// build that runs it has already produced it. Typechecking it would require
+	// building first, so it is checked by Node at run time instead.
+	"exclude": ["scripts/prerender.ts"]
 }

@@ -1,39 +1,27 @@
-import { FOOTER, SITE } from "#/content/site";
-import type { NavLink } from "#/types";
-
-function isFutureLink(href: string): boolean {
-	return href === "#";
-}
-
-function FooterLink({ link }: { link: NavLink }) {
-	const pending = isFutureLink(link.href);
-	return (
-		<a href={link.href} {...(pending ? { "aria-disabled": true, "data-pending": true } : {})}>
-			{link.label}
-		</a>
-	);
-}
+import { getFooter, SITE } from "#/content/site";
+import { SiteLink } from "./ui/SiteLink";
 
 export function Footer() {
+	const footer = getFooter();
 	const telHref = `tel:${SITE.phone.replace(/\s+/g, "")}`;
 
 	return (
 		<footer className="footer">
 			<div className="container">
-				<h2 className="footer__title">{FOOTER.talkLine}</h2>
+				<h2 className="footer__title">{footer.talkLine}</h2>
 
 				<div className="footer__grid">
 					<div>
-						<h3>{FOOTER.quickLinksTitle}</h3>
-						<nav className="footer__links" aria-label={FOOTER.quickLinksTitle}>
-							{FOOTER.quickLinks.map((link) => (
-								<FooterLink key={link.href + link.label} link={link} />
+						<h3>{footer.quickLinksTitle}</h3>
+						<nav className="footer__links" aria-label={footer.quickLinksTitle}>
+							{footer.quickLinks.map((link) => (
+								<SiteLink key={link.to + link.label} link={link} />
 							))}
 						</nav>
 					</div>
 
 					<div>
-						<h3>{FOOTER.contactTitle}</h3>
+						<h3>{footer.contactTitle}</h3>
 						<address className="footer__contact">
 							<span>{SITE.street}</span>
 							<span>{SITE.city}</span>
@@ -43,16 +31,16 @@ export function Footer() {
 					</div>
 
 					<div>
-						<h3 className="sr-only">Legal</h3>
-						<nav className="footer__links" aria-label="Legal">
-							{FOOTER.legalLinks.map((link) => (
-								<FooterLink key={link.href + link.label} link={link} />
+						<h3 className="sr-only">{footer.legalTitle}</h3>
+						<nav className="footer__links" aria-label={footer.legalTitle}>
+							{footer.legalLinks.map((link) => (
+								<SiteLink key={link.to + link.label} link={link} />
 							))}
 						</nav>
 					</div>
 				</div>
 
-				<div className="footer__bottom">{FOOTER.copyright}</div>
+				<div className="footer__bottom">{footer.copyright}</div>
 			</div>
 		</footer>
 	);

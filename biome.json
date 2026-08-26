@@ -13,6 +13,8 @@
 			"**/*.jsx",
 			"**/*.json",
 			"**/*.css",
+			"!src/routeTree.gen.ts",
+			"!.claude",
 			"!dist",
 			"!node_modules",
 			"!public",

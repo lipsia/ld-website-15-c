@@ -1,16 +1,18 @@
-import { COMPETENCES } from "#/content/site";
+import { getCompetences } from "#/content/site";
 import { Reveal } from "./ui/Reveal";
 
 export function Competence() {
+	const competences = getCompetences();
+
 	return (
 		<section id="competence" aria-labelledby="competence-heading">
 			<div className="container">
 				<Reveal className="section-head">
-					<h2 id="competence-heading">{COMPETENCES.title}</h2>
+					<h2 id="competence-heading">{competences.title}</h2>
 				</Reveal>
 
 				<div className="card-grid">
-					{COMPETENCES.items.map((item, index) => (
+					{competences.items.map((item, index) => (
 						<Reveal key={item.id} delay={index * 0.08}>
 							<article className="card">
 								<h3>{item.title}</h3>

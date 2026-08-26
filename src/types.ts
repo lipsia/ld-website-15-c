@@ -40,7 +40,18 @@ export interface ClientMark {
 	readonly logo: string;
 }
 
+/**
+ * A link into the site, expressed as a route rather than a raw href.
+ *
+ * Split into `to` + `hash` because a bare "#competence" only works while you are
+ * already on the home page — from /team it resolves against the wrong document. The
+ * router needs the destination route and the anchor as separate values to build a
+ * correct URL from anywhere, and (from Phase 2) to localise the path.
+ */
 export interface NavLink {
 	readonly label: string;
-	readonly href: string;
+	/** Route path, e.g. "/" or "/team". */
+	readonly to: string;
+	/** Optional in-page anchor within that route, WITHOUT the leading "#". */
+	readonly hash?: string;
 }

@@ -1,7 +1,8 @@
 import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
-import { CLIENTS } from "#/content/site";
+import { getClients } from "#/content/site";
 import { ErrorBoundary } from "#/lib/ErrorBoundary";
 import { useReducedMotion } from "#/lib/useReducedMotion";
+import { m } from "#/paraglide/messages";
 import { createDiceControls } from "#/three/ClientDice";
 import type { RenderPolicy } from "#/types";
 import { Reveal } from "./ui/Reveal";
@@ -19,9 +20,11 @@ const CLICK_SLOP = 6;
  * roster is the content here, and the die is the presentation.
  */
 function LogoWall() {
+	const marks = getClients().marks;
+
 	return (
 		<ul className="logo-wall">
-			{CLIENTS.marks.map((mark) => (
+			{marks.map((mark) => (
 				<li key={mark.id}>
 					<img src={mark.logo} alt={mark.name} width={160} height={160} loading="lazy" />
 				</li>
@@ -31,6 +34,7 @@ function LogoWall() {
 }
 
 export function Clients({ policy }: { policy: RenderPolicy }) {
+	const clients = getClients();
 	const reducedMotion = useReducedMotion();
 	// Mutable and read inside the render loop: a drag produces dozens of events per
 	// second and none of them should re-render React.
@@ -86,8 +90,8 @@ export function Clients({ policy }: { policy: RenderPolicy }) {
 		<section id="clients" aria-labelledby="clients-heading">
 			<div className="container">
 				<Reveal className="section-head">
-					<span className="eyebrow">{CLIENTS.eyebrow}</span>
-					<h2 id="clients-heading">{CLIENTS.title}</h2>
+					<span className="eyebrow">{clients.eyebrow}</span>
+					<h2 id="clients-heading">{clients.title}</h2>
 				</Reveal>
 
 				{policy.webgl ? (
@@ -108,7 +112,7 @@ export function Clients({ policy }: { policy: RenderPolicy }) {
 							<ErrorBoundary fallback={<LogoWall />}>
 								<Suspense fallback={<LogoWall />}>
 									<ClientDice
-										marks={CLIENTS.marks}
+										marks={clients.marks}
 										controls={controls}
 										reducedMotion={reducedMotion}
 										dpr={policy.dpr}
@@ -122,13 +126,13 @@ export function Clients({ policy }: { policy: RenderPolicy }) {
 						    it is focused — the same trick the skip link uses — so the section
 						    stays clean without the interaction becoming mouse-only. */}
 						<button type="button" className="dice__toggle" onClick={toggle}>
-							{open ? "Collect client logos" : "Spread out client logos"}
+							{open ? m.dice_collect() : m.dice_spread()}
 						</button>
 
 						{/* The roster as real text. The canvas can express it visually but not
 						    semantically, so the names are published here regardless. */}
 						<ul className="sr-only">
-							{CLIENTS.marks.map((mark) => (
+							{clients.marks.map((mark) => (
 								<li key={mark.id}>{mark.name}</li>
 							))}
 						</ul>

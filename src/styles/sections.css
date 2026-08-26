@@ -38,6 +38,60 @@ section {
 	text-wrap: balance;
 }
 
+/* Language switcher — two short mono labels, the inactive one dimmed. */
+.nav__locales {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2xs);
+	font-family: var(--font-mono);
+	font-size: var(--step--1);
+	letter-spacing: 0.08em;
+}
+
+.nav__locales a {
+	padding: 0.25rem 0.4rem;
+	border-radius: var(--radius-s);
+	color: var(--text-lo);
+	text-decoration: none;
+	transition: color var(--dur-fast) var(--ease-out-expo);
+}
+
+.nav__locales a:hover {
+	color: var(--text-hi);
+}
+
+/* The active locale is state, not a destination — styled as a label, and the anchor
+   carries aria-current so it is announced that way too. */
+.nav__locales a[data-active="true"] {
+	color: var(--text-hi);
+	background: var(--line-soft);
+}
+
+.nav__locales--panel {
+	justify-content: center;
+	margin-block-start: var(--space-xs);
+}
+
+/* === Secondary pages === */
+
+/* Pages with no 3D behind them: the nav is fixed, so the first section has to clear
+   it itself rather than relying on the hero's taller padding. */
+.page {
+	min-height: 60svh;
+	padding-block-start: var(--space-3xl);
+}
+
+.page h1 {
+	font-size: var(--step-4);
+	line-height: 1.08;
+	margin: 0;
+}
+
+.page__pending {
+	max-width: var(--measure);
+	color: var(--text-mid);
+}
+
 /* === Buttons === */
 
 .btn {

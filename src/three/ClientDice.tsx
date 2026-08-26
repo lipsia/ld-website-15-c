@@ -303,6 +303,14 @@ function Dice({ marks, logos, controls, reducedMotion }: DiceProps) {
 }
 
 /**
+ * Kept at module scope so the same reference can be removed again — an inline arrow
+ * cannot be unregistered, which is how this listener outlived its canvas.
+ */
+function preventContextLoss(event: Event) {
+	event.preventDefault();
+}
+
+/**
  * Loads the logo textures with a plain `TextureLoader`, deliberately NOT with drei's
  * `useTexture`.
  *
@@ -320,17 +328,25 @@ function useLogoTextures(marks: readonly ClientMark[]): THREE.Texture[] | null {
 
 	useEffect(() => {
 		let cancelled = false;
+		// Textures handed to state are owned by this effect, not by R3F: they are created
+		// imperatively, so nothing else will ever release them. Held here so cleanup can
+		// dispose the set that is actually on the die — releasing them only on the
+		// lost-race path leaked fifteen textures on every unmount, which is invisible on
+		// a single-page site and a real leak once routing can navigate away and back.
+		let owned: THREE.Texture[] = [];
 		const loader = new THREE.TextureLoader();
 		const urls = key.split("|").filter(Boolean);
 
 		Promise.all(urls.map((url) => loader.loadAsync(url)))
 			.then((loaded) => {
 				if (cancelled) {
-					// Lost the race with an unmount — release the GPU memory rather than
-					// leaking a set of textures nothing will ever draw.
+					// Lost the race with an unmount — cleanup has already run and cannot
+					// dispose these, so they are disposed here instead. Exactly one of the
+					// two branches ever owns a given set.
 					for (const texture of loaded) texture.dispose();
 					return;
 				}
+				owned = loaded;
 				for (const texture of loaded) {
 					texture.colorSpace = THREE.SRGBColorSpace;
 					// The tiles are small and steeply angled at the die's silhouette, where
@@ -346,6 +362,8 @@ function useLogoTextures(marks: readonly ClientMark[]): THREE.Texture[] | null {
 
 		return () => {
 			cancelled = true;
+			for (const texture of owned) texture.dispose();
+			owned = [];
 		};
 	}, [key]);
 
@@ -365,17 +383,33 @@ export function ClientDice({ marks, controls, reducedMotion, dpr }: ClientDicePr
 
 	const logos = useLogoTextures(shown);
 
+	// Held so unmount can dispose it. R3F is supposed to tear the renderer down with
+	// the Canvas and demonstrably does not here: after navigating away, three's own
+	// `onContextLost` listener stays registered on the canvas element, and its scope
+	// retains the WebGLRenderer — one leaked renderer, camera pair and shader material
+	// set per visit to this page. Only `renderer.dispose()` unregisters that listener.
+	// Left alone it is not merely memory: browsers cap live WebGL contexts at around
+	// sixteen, so enough navigations reclaim the oldest and the die goes blank.
+	const glRef = useRef<THREE.WebGLRenderer | null>(null);
+
 	const onCreated = useCallback(({ gl }: { gl: THREE.WebGLRenderer }) => {
+		glRef.current = gl;
 		gl.setClearAlpha(0);
 		// Without preventDefault the browser will not attempt to restore a lost
 		// context, and the canvas stays blank for good.
-		gl.domElement.addEventListener(
-			"webglcontextlost",
-			(event) => {
-				event.preventDefault();
-			},
-			false,
-		);
+		gl.domElement.addEventListener("webglcontextlost", preventContextLoss, false);
+	}, []);
+
+	useEffect(() => {
+		return () => {
+			const gl = glRef.current;
+			if (!gl) return;
+			// Order matters: our own listener must go first, or three's teardown can
+			// trip it and ask the browser to restore a context we are discarding.
+			gl.domElement.removeEventListener("webglcontextlost", preventContextLoss);
+			gl.dispose();
+			glRef.current = null;
+		};
 	}, []);
 
 	// The container reserves its height in CSS, so returning null here costs no layout

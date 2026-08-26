@@ -1,4 +1,4 @@
-import { HERO, SITE } from "#/content/site";
+import { getHero, HERO_WORDMARK, SITE } from "#/content/site";
 import { PixelWordmark } from "./ui/PixelWordmark";
 import { Reveal } from "./ui/Reveal";
 
@@ -10,19 +10,21 @@ import { Reveal } from "./ui/Reveal";
  * page's most important heading is machine-readable even though it is drawn.
  */
 export function Hero() {
+	const hero = getHero();
+
 	return (
 		<section id="hero" className="hero" aria-labelledby="hero-heading">
 			<div className="container hero__inner">
 				<h1 id="hero-heading" className="hero__wordmark-heading">
 					<span className="sr-only">{SITE.name}</span>
-					<PixelWordmark lines={HERO.wordmark} />
+					<PixelWordmark lines={HERO_WORDMARK} />
 				</h1>
 
 				<Reveal delay={0.15} className="hero__meta">
-					<p className="hero__tagline">{HERO.headline}</p>
+					<p className="hero__tagline">{hero.headline}</p>
 
 					<ul className="hero__disciplines">
-						{HERO.disciplines.map((discipline) => (
+						{hero.disciplines.map((discipline) => (
 							<li key={discipline}>{discipline}</li>
 						))}
 					</ul>

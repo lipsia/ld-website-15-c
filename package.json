@@ -12,7 +12,10 @@
 	},
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc -b && vite build",
+		"build": "tsc -b && vite build && pnpm build:ssr && pnpm prerender",
+		"build:ssr": "vite build --ssr src/entry-server.tsx --outDir dist-ssr",
+		"prerender": "node scripts/prerender.ts",
+		"i18n:compile": "node scripts/compile-i18n.ts",
 		"preview": "vite preview",
 		"typecheck": "tsc -b",
 		"lint": "biome lint",
@@ -22,12 +25,14 @@
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"audit": "pnpm audit --prod",
-		"prepare": "husky"
+		"prepare": "husky && pnpm i18n:compile"
 	},
 	"dependencies": {
+		"@inlang/paraglide-js": "2.24.1",
 		"@react-three/drei": "10.7.8",
 		"@react-three/fiber": "9.7.0",
 		"@react-three/postprocessing": "3.1.0",
+		"@tanstack/react-router": "1.170.32",
 		"motion": "13.1.1",
 		"postprocessing": "6.39.4",
 		"react": "19.2.8",
@@ -36,6 +41,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.10",
+		"@tanstack/router-plugin": "1.168.35",
 		"@testing-library/jest-dom": "7.0.1",
 		"@testing-library/react": "16.3.2",
 		"@types/node": "24.10.1",

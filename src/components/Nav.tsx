@@ -1,29 +1,17 @@
+import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { HERO, NAV_LINKS, SITE } from "#/content/site";
+import { getHero, getNavLinks, SITE } from "#/content/site";
+import { m } from "#/paraglide/messages";
 import { scrollStore } from "#/scroll/scrollStore";
-import type { NavLink } from "#/types";
 import { LdMark } from "./ui/LdMark";
+import { LocaleSwitcher } from "./ui/LocaleSwitcher";
+import { SiteLink } from "./ui/SiteLink";
 
 const SCROLLED_THRESHOLD_PX = 24;
 
-function isFutureLink(href: string): boolean {
-	return href === "#";
-}
-
-function NavAnchor({ link, onNavigate }: { link: NavLink; onNavigate?: () => void }) {
-	const pending = isFutureLink(link.href);
-	return (
-		<a
-			href={link.href}
-			{...(pending ? { "aria-disabled": true, "data-pending": true } : {})}
-			onClick={onNavigate}
-		>
-			{link.label}
-		</a>
-	);
-}
-
 export function Nav() {
+	const links = getNavLinks();
+	const hero = getHero();
 	const [scrolled, setScrolled] = useState(false);
 	const [open, setOpen] = useState(false);
 	const toggleRef = useRef<HTMLButtonElement>(null);
@@ -62,24 +50,26 @@ export function Nav() {
 	return (
 		<header className="nav" data-scrolled={scrolled}>
 			<div className="nav__inner">
-				<a className="nav__wordmark" href="#hero">
+				<Link className="nav__wordmark" to="/" hash="hero">
 					<LdMark className="nav__mark" />
 					{/* The mark is decorative, so the link carries the name itself. */}
 					<span className="sr-only">{SITE.name}</span>
-				</a>
+				</Link>
 
-				<nav className="nav__links" aria-label="Primary">
-					{NAV_LINKS.map((link) => (
-						<NavAnchor key={link.href + link.label} link={link} />
+				<nav className="nav__links" aria-label={m.nav_primary_label()}>
+					{links.map((link) => (
+						<SiteLink key={link.to + link.label} link={link} />
 					))}
 				</nav>
 
-				<a className="btn btn--primary nav__cta" href={HERO.ctaPrimary.href}>
-					{HERO.ctaPrimary.label}
+				<LocaleSwitcher className="nav__locales" />
+
+				<SiteLink className="btn btn--primary nav__cta" link={hero.ctaPrimary}>
+					{hero.ctaPrimary.label}
 					<span className="btn__arrow" aria-hidden="true">
 						&rarr;
 					</span>
-				</a>
+				</SiteLink>
 
 				<button
 					ref={toggleRef}
@@ -89,7 +79,7 @@ export function Nav() {
 					aria-controls="nav-panel"
 					onClick={() => setOpen((value) => !value)}
 				>
-					<span className="sr-only">Menu</span>
+					<span className="sr-only">{m.nav_menu()}</span>
 					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
 						<path
 							d="M2 5h16M2 10h16M2 15h16"
@@ -103,12 +93,13 @@ export function Nav() {
 
 			{open ? (
 				<div id="nav-panel" className="nav__panel glass">
-					{NAV_LINKS.map((link) => (
-						<NavAnchor key={link.href + link.label} link={link} onNavigate={closePanel} />
+					{links.map((link) => (
+						<SiteLink key={link.to + link.label} link={link} onNavigate={closePanel} />
 					))}
-					<a className="btn btn--primary" href={HERO.ctaPrimary.href} onClick={closePanel}>
-						{HERO.ctaPrimary.label}
-					</a>
+					<SiteLink className="btn btn--primary" link={hero.ctaPrimary} onNavigate={closePanel}>
+						{hero.ctaPrimary.label}
+					</SiteLink>
+					<LocaleSwitcher className="nav__locales nav__locales--panel" />
 				</div>
 			) : null}
 		</header>

@@ -1,15 +1,27 @@
 /**
- * All copy on this page is transcribed verbatim from the live English site at
- * https://lipsia.digital/en/. Do not edit without explicit sign-off from marketing.
+ * All copy is transcribed verbatim from the live site — German from
+ * https://lipsia.digital/, English from https://lipsia.digital/en/. Do not edit
+ * without explicit sign-off from marketing.
+ *
+ * Strings live in messages/{de,en}.json and reach the app as Paraglide's `m.*()`
+ * functions. This module keeps the SHAPE — which cards exist, in what order, with what
+ * ids — and pulls the words through `m` at call time.
+ *
+ * Everything translatable is therefore behind a `get*()` function, deliberately. `m.*()`
+ * reads the ambient locale when it is CALLED, so evaluating one at module scope would
+ * freeze the language at import time: the page would render whatever locale happened to
+ * be active on first import and the switcher would silently do nothing.
+ *
+ * Facts that are not copy — the address, the phone number, client names, logo paths,
+ * route targets, stat values — stay as plain consts. A street does not get translated.
  */
 
+import { m } from "#/paraglide/messages";
 import type { ClientMark, NavLink, ServiceItem, StatItem } from "#/types";
 
+/** Locale-independent identity and contact details. */
 export const SITE = {
 	name: "Lipsia Digital",
-	tagline: "We bring visions to life",
-	description:
-		"Successfully implement transformations and shape the future with digital solutions. Software Engineering, Information Systems and Digital Products from Leipzig.",
 	url: "https://lipsia.digital",
 	email: "info@lipsia.digital",
 	phone: "01523 3881705",
@@ -17,136 +29,195 @@ export const SITE = {
 	city: "04109 Leipzig",
 } as const;
 
-export const NAV_LINKS = [
-	{ label: "Home", href: "#hero" },
-	{ label: "Vision", href: "#competence" },
-	{ label: "Services", href: "#services" },
-	{ label: "Clients", href: "#clients" },
-	{ label: "Contacts", href: "#contact" },
-] as const satisfies readonly NavLink[];
+export function getSiteMeta() {
+	return {
+		tagline: m.site_tagline(),
+		description: m.site_description(),
+	};
+}
 
-export const HERO = {
-	headline: "We bring visions to life",
-	/** Rendered as the pixel mosaic in the hero. One entry per line. */
-	wordmark: ["lipsia digital"],
-	subheadline:
-		"Successfully implement transformations and shape the future with digital solutions.",
-	disciplines: ["Software Engineering", "Information Systems", "Digital products"],
-	ctaPrimary: { label: "Contact", href: "#contact" },
-	ctaSecondary: { label: "Career", href: "#" },
-} as const;
+/**
+ * The top nav carries only destinations you cannot reach some other way: the LD mark
+ * already goes home, and Contact is the button at the right-hand end, so neither needs
+ * a second entry. Clients is a section of the home page rather than a place to go.
+ * getFooter().quickLinks stays the fuller index.
+ *
+ * Route paths are the German (base locale) ones; Paraglide's urlPatterns localise them,
+ * so `/karriere` is rendered as `/en/career` when the English locale is active.
+ */
+export function getNavLinks(): readonly NavLink[] {
+	return [
+		{ label: m.nav_vision(), to: "/", hash: "competence" },
+		{ label: m.nav_services(), to: "/", hash: "services" },
+		{ label: m.nav_team(), to: "/team" },
+		{ label: m.nav_career(), to: "/karriere" },
+	];
+}
 
-export const COMPETENCES = {
-	title: "Our fields of competence",
-	items: [
-		{
-			id: "software-engineering",
-			title: "Software Engineering",
-			body: "We develop tailor-made software solutions for you, from planning and design to implementation and support, the right experts are at your side.",
-		},
-		{
-			id: "crm-system",
-			title: "CRM System",
-			body: "We accompany your transformation to a digital, customer-centric company and help to sustainably improve your customer:internal relationships with CRM solutions in order to unleash new growth potential.",
-		},
-		{
-			id: "it-consulting",
-			title: "IT Consulting",
-			body: "Our analysts and software architects identify potential in your IT enterprise architecture and align it with your current and future business model, taking into account organizational, functional and human factors.",
-		},
-	] as const,
-} as const satisfies { title: string; items: readonly ServiceItem[] };
+/** The brand mark as drawn in the hero mosaic. Not copy — it is the logotype. */
+export const HERO_WORDMARK = ["lipsia digital"] as const;
 
-export const SERVICES = {
-	title: "Our services for your business",
-	items: [
-		{
-			id: "websites-webapps",
-			title: "WEBSITES & WEBAPPS",
-			body: "Modern, intuitive and secure websites and functional web apps as a digital customer contact point for your company.",
-		},
-		{
-			id: "e-commerce",
-			title: "E-COMMERCE SOLUTIONS",
-			body: "Efficient solutions for building and operating digital marketplaces and stores where design and functionality go hand in hand",
-		},
-		{
-			id: "custom-applications",
-			title: "CUSTOM APPLICATIONS",
-			body: "Customized operational application systems and interfaces to strengthen your market position and automate operational activities",
-		},
-		{
-			id: "enterprise-platforms",
-			title: "ENTERPRISE PLATFORMS & APPLICATIONS",
-			body: "Operational information systems with which you control, monitor, evaluate and automate your operational and scheduling processes as well as cross-company business processes",
-		},
-	] as const,
-} as const satisfies { title: string; items: readonly ServiceItem[] };
+export function getHero() {
+	return {
+		headline: m.hero_headline(),
+		subheadline: m.hero_subheadline(),
+		disciplines: [
+			m.hero_discipline_software(),
+			m.hero_discipline_systems(),
+			m.hero_discipline_products(),
+		],
+		ctaPrimary: { label: m.nav_contact(), to: "/", hash: "contact" } satisfies NavLink,
+		ctaSecondary: { label: m.nav_career(), to: "/karriere" } satisfies NavLink,
+	};
+}
 
-export const TECH = {
-	title: "Technologies & Digital Competencies",
-	lead: "With future-oriented technologies, pioneering digitization strategies and experienced teams, we develop needs-based solutions to shape success stories.",
-	body: "From potential analysis and qualified conception to project consulting, interface and software development, and adaptation of standard solutions to integration, commissioning, and further development – as specialists in software engineering and business information systems, we bundle experts and solution concepts along a digitization strategy to realize digital business models and cross-company information logistics.",
-	closing:
-		"Our team of international experts will support your company and project as pioneers and companions.",
-	stats: [
-		{ id: "experts", label: "International experts", value: 30, suffix: "+" },
-		{ id: "languages", label: "Languages spoken", value: 10, suffix: "+" },
-	] as const,
-} as const satisfies {
+export function getCompetences(): { title: string; items: readonly ServiceItem[] } {
+	return {
+		title: m.competences_title(),
+		items: [
+			{
+				id: "software-engineering",
+				title: m.competence_software_title(),
+				body: m.competence_software_body(),
+			},
+			{ id: "crm-system", title: m.competence_crm_title(), body: m.competence_crm_body() },
+			{
+				id: "it-consulting",
+				title: m.competence_consulting_title(),
+				body: m.competence_consulting_body(),
+			},
+		],
+	};
+}
+
+export function getServices(): { title: string; items: readonly ServiceItem[] } {
+	return {
+		title: m.services_title(),
+		items: [
+			{
+				id: "websites-webapps",
+				title: m.service_websites_title(),
+				body: m.service_websites_body(),
+			},
+			{ id: "e-commerce", title: m.service_ecommerce_title(), body: m.service_ecommerce_body() },
+			{
+				id: "custom-applications",
+				title: m.service_custom_title(),
+				body: m.service_custom_body(),
+			},
+			{
+				id: "enterprise-platforms",
+				title: m.service_enterprise_title(),
+				body: m.service_enterprise_body(),
+			},
+		],
+	};
+}
+
+export function getTech(): {
 	title: string;
 	lead: string;
 	body: string;
 	closing: string;
 	stats: readonly StatItem[];
-};
+} {
+	return {
+		title: m.tech_title(),
+		lead: m.tech_lead(),
+		body: m.tech_body(),
+		closing: m.tech_closing(),
+		// Values are facts, not copy — only the labels translate.
+		stats: [
+			{ id: "experts", label: m.tech_stat_experts(), value: 30, suffix: "+" },
+			{ id: "languages", label: m.tech_stat_languages(), value: 10, suffix: "+" },
+		],
+	};
+}
 
-export const CLIENTS = {
-	eyebrow: "CLIENTS",
-	title: "who place their trust in us",
-	marks: [
-		{ id: "commerzbank", name: "Commerzbank", logo: "/assets/clients/commerzbank.png" },
-		{ id: "dkms", name: "DKMS", logo: "/assets/clients/dkms.png" },
-		{ id: "ekd", name: "Energiekonzepte Deutschland", logo: "/assets/clients/ekd.png" },
-		{ id: "smava", name: "smava", logo: "/assets/clients/smava.png" },
-		{ id: "teambank", name: "TeamBank", logo: "/assets/clients/teambank.png" },
-		{ id: "philoro", name: "philoro", logo: "/assets/clients/philoro.png" },
-		{ id: "qunomedical", name: "Qunomedical", logo: "/assets/clients/qunomedical.png" },
-		{ id: "rapidobject", name: "Rapidobject", logo: "/assets/clients/rapidobject.png" },
-		{ id: "truck-norris", name: "Truck Norris", logo: "/assets/clients/truck-norris.png" },
-		{ id: "buzzard", name: "Buzzard", logo: "/assets/clients/buzzard.png" },
-		{ id: "hsm", name: "Hessisches Sozialministerium", logo: "/assets/clients/hsm.png" },
-		{
-			id: "financial-service-plus",
-			name: "Financial Service Plus",
-			logo: "/assets/clients/financial-service-plus.png",
-		},
-		{ id: "ass-altenburger", name: "Ass Altenburger", logo: "/assets/clients/ass-altenburger.png" },
-		{ id: "so-use", name: "SO-USE", logo: "/assets/clients/so-use.png" },
-		{ id: "enercity", name: "enercity", logo: "/assets/clients/enercity.png" },
-	] as const,
-} as const satisfies { eyebrow: string; title: string; marks: readonly ClientMark[] };
+/**
+ * Client names are proper nouns and their logos are artwork: identical in every locale,
+ * so they stay a const rather than becoming sixty message keys that never differ.
+ */
+export const CLIENT_MARKS = [
+	{ id: "commerzbank", name: "Commerzbank", logo: "/assets/clients/commerzbank.png" },
+	{ id: "dkms", name: "DKMS", logo: "/assets/clients/dkms.png" },
+	{ id: "ekd", name: "Energiekonzepte Deutschland", logo: "/assets/clients/ekd.png" },
+	{ id: "smava", name: "smava", logo: "/assets/clients/smava.png" },
+	{ id: "teambank", name: "TeamBank", logo: "/assets/clients/teambank.png" },
+	{ id: "philoro", name: "philoro", logo: "/assets/clients/philoro.png" },
+	{ id: "qunomedical", name: "Qunomedical", logo: "/assets/clients/qunomedical.png" },
+	{ id: "rapidobject", name: "Rapidobject", logo: "/assets/clients/rapidobject.png" },
+	{ id: "truck-norris", name: "Truck Norris", logo: "/assets/clients/truck-norris.png" },
+	{ id: "buzzard", name: "Buzzard", logo: "/assets/clients/buzzard.png" },
+	{ id: "hsm", name: "Hessisches Sozialministerium", logo: "/assets/clients/hsm.png" },
+	{
+		id: "financial-service-plus",
+		name: "Financial Service Plus",
+		logo: "/assets/clients/financial-service-plus.png",
+	},
+	{ id: "ass-altenburger", name: "Ass Altenburger", logo: "/assets/clients/ass-altenburger.png" },
+	{ id: "so-use", name: "SO-USE", logo: "/assets/clients/so-use.png" },
+	{ id: "enercity", name: "enercity", logo: "/assets/clients/enercity.png" },
+] as const satisfies readonly ClientMark[];
 
-export const CTA_SECTION = {
-	title: "With us you can grow.",
-	body: "We design a strategy tailored to your individual needs and implement your digital transformation along these lines.",
-	cta: { label: "Contact", href: "#contact" },
-} as const;
+export function getClients(): { eyebrow: string; title: string; marks: readonly ClientMark[] } {
+	return {
+		eyebrow: m.clients_eyebrow(),
+		title: m.clients_title(),
+		marks: CLIENT_MARKS,
+	};
+}
 
-export const FOOTER = {
-	talkLine: "Let’s talk about what we can do for you",
-	quickLinksTitle: "Quick Links",
-	contactTitle: "Contact Us",
-	quickLinks: [
-		{ label: "Home", href: "#hero" },
-		{ label: "Vision", href: "#competence" },
-		{ label: "Team", href: "#" },
-		{ label: "Career", href: "#" },
-		{ label: "Contacts", href: "#contact" },
-	] as const satisfies readonly NavLink[],
-	legalLinks: [
-		{ label: "Privacy", href: "#" },
-		{ label: "Impressum", href: "#" },
-	] as const satisfies readonly NavLink[],
-	copyright: "Lipsia Digital © 2023",
-} as const;
+export function getCta() {
+	return {
+		title: m.cta_title(),
+		body: m.cta_body(),
+		cta: { label: m.nav_contact(), to: "/", hash: "contact" } satisfies NavLink,
+	};
+}
+
+/**
+ * The secondary pages. Titles only — body copy is Phase 5 of docs/PLAN.md and must be
+ * transcribed from the live site or signed off by marketing, not invented here.
+ *
+ * `pending: true` is what makes the unfinished state visible in the UI instead of
+ * shipping a page that looks finished and says nothing. Impressum and Datenschutz are
+ * legally required to carry real content before this site goes live.
+ */
+export function getPages() {
+	return {
+		team: { title: m.page_team_title(), eyebrow: m.page_team_eyebrow(), pending: true },
+		career: { title: m.page_career_title(), eyebrow: m.page_career_eyebrow(), pending: true },
+		imprint: { title: m.page_imprint_title(), eyebrow: m.page_legal_eyebrow(), pending: true },
+		privacy: { title: m.page_privacy_title(), eyebrow: m.page_legal_eyebrow(), pending: true },
+	};
+}
+
+export function getFooter(): {
+	talkLine: string;
+	quickLinksTitle: string;
+	contactTitle: string;
+	legalTitle: string;
+	quickLinks: readonly NavLink[];
+	legalLinks: readonly NavLink[];
+	copyright: string;
+} {
+	return {
+		talkLine: m.footer_talk_line(),
+		quickLinksTitle: m.footer_quick_links_title(),
+		contactTitle: m.footer_contact_title(),
+		legalTitle: m.footer_legal_title(),
+		quickLinks: [
+			{ label: m.nav_home(), to: "/", hash: "hero" },
+			{ label: m.nav_vision(), to: "/", hash: "competence" },
+			{ label: m.nav_team(), to: "/team" },
+			{ label: m.nav_career(), to: "/karriere" },
+			{ label: m.nav_contact(), to: "/", hash: "contact" },
+		],
+		legalLinks: [
+			{ label: m.footer_privacy(), to: "/datenschutz" },
+			{ label: m.footer_imprint(), to: "/impressum" },
+		],
+		copyright: m.footer_copyright(),
+	};
+}

@@ -26,6 +26,8 @@ Single-page marketing site for lipsia.digital. Centrepiece is the LD logo as a G
 
 ## Structure & conventions
 
+- The 3D scene is HOME-ONLY. `src/routes/index.tsx` mounts it; `__root.tsx` must never. Both the LD logo (`LogoParticles`) and the ambient dust shell (`ParticleField`) are part of it, so team/career/legal pages carry no canvas at all.
+- `src/routes/` — file-based routes (TanStack Router). `routeTree.gen.ts` is generated and tracked; Biome ignores it. We use Router, NOT TanStack Start: Start inlines a hydration payload our `script-src 'self'` CSP forbids (see docs/PLAN.md §1.1).
 - `src/three/` — WebGL layer. `Scene.tsx` is canvas root; `LogoParticles.tsx`, `logoGeometry.ts`, `shaders/logoShader.ts` are the hero particle system; `ParticleField.tsx`, `Backdrop.tsx`, `Effects.tsx`, `CameraRig.tsx` are ambient layers.
 - `src/scroll/` — `scrollStore.ts` is a ref-based scroll store (zero re-renders per 60fps scroll); `ScrollProvider.tsx` feeds it from native scroll events. Scroll is NOT hijacked — smooth-scroll libraries were tried and removed because interpolating the scroll position makes every gesture feel like an ease-in-out animation. The scene damps `uScroll` in its own loop instead.
 - `src/components/` — DOM sections; `src/components/ui/` — primitives (Reveal, Counter, Marquee, Seo).
@@ -40,7 +42,7 @@ Single-page marketing site for lipsia.digital. Centrepiece is the LD logo as a G
 - Scene is decorative and `aria-hidden`; all content is real DOM above it.
 - `three` is a lazy chunk — first paint never waits on it.
 - Particle count / DPR / postprocessing come from `RenderPolicy` in `src/lib/capabilities.ts`, never hardcoded per component.
-- Every three.js resource created imperatively must be disposed (React StrictMode double-mounts).
+- Every three.js resource created imperatively must be disposed. Routing unmounts the home page's canvases on every navigation away, and StrictMode double-mounts in dev — both exercise this path, so a missed dispose is a production leak, not a dev-only artefact. Listeners added imperatively count: register a named function you can remove again, never an inline arrow.
 - Never allocate objects (Vector3, Color, arrays) inside `useFrame`.
 
 ## Two traps that already bit us
