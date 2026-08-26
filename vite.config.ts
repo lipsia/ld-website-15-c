@@ -2,7 +2,7 @@ import { paraglideVitePlugin } from "@inlang/paraglide-js";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import { paraglideCompilerOptions } from "./paraglide.config";
+import { paraglideCompilerOptions } from "./paraglide.config.ts";
 
 export default defineConfig({
 	// Consume the `#/*` alias straight from tsconfig instead of duplicating it here.
