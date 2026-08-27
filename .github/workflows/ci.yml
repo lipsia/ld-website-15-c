@@ -4,10 +4,19 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded PR runs are worth cancelling; a main run is not, because it carries the
+  # deploy job and cancelling mid-upload leaves a half-published deployment.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # The Cloudflare Pages project, which is also the hostname:
+  # https://lipsia-digital.pages.dev. Changing this points the deploy at a different
+  # project — it does NOT rename the existing one.
+  CF_PAGES_PROJECT: lipsia-digital
 
 jobs:
   quality:
@@ -37,3 +46,65 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      # Handing dist/ to the deploy job is what guarantees the bytes that go live are
+      # the exact ones these gates passed on, and it keeps the build from running
+      # twice. Skipped on pull_request, where nothing is deployed.
+      - name: Upload build output
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
+
+  deploy:
+    needs: quality
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      # Lets wrangler-action register the run as a GitHub Deployment, so the commit
+      # and the Environments tab both link straight to the published URL.
+      deployments: write
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      # No checkout: the deploy consumes the artifact, never a fresh build. Anything
+      # this job needed from the repo would be a second source of truth for what ships.
+      - name: Download build output
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          # Pinned for the same reason every dependency in package.json is pinned:
+          # left unset the action floats to whatever wrangler is latest that morning,
+          # so a deploy could change behaviour with no commit behind it.
+          wranglerVersion: "4.126.0"
+          # --branch must match the project's production branch, or Cloudflare files
+          # this as a preview deployment and the apex .pages.dev host never updates.
+          command: pages deploy dist --project-name=${{ env.CF_PAGES_PROJECT }} --branch=main
+
+      - name: Summarise deployment
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          ALIAS_URL: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+        run: |
+          {
+            echo "### Deployed to Cloudflare Pages"
+            echo ""
+            echo "- Live: <https://${CF_PAGES_PROJECT}.pages.dev>"
+            echo "- This deployment: <${DEPLOYMENT_URL}>"
+            echo "- Branch alias: <${ALIAS_URL}>"
+          } >> "$GITHUB_STEP_SUMMARY"

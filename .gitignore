@@ -8,6 +8,9 @@ dist-ssr/
 
 # Environment files
 .env
+# .env.local needs its own line: the glob below cannot match it, because `*`
+# would have to stand for the empty string between two dots.
+.env.local
 .env.*.local
 !.env.example
 
@@ -49,3 +52,12 @@ src/paraglide
 
 # TanStack Router plugin scratch dir
 .tanstack
+
+# wrangler's local state + cache, written by any `wrangler pages ...` run
+.wrangler/
+
+# Cloudflare's local-secrets convention. Nothing here is needed to build the
+# site — the deploy reads its credentials from GitHub Actions secrets — so a
+# .dev.vars appearing at all means someone put a real token on disk.
+.dev.vars
+.dev.vars.*

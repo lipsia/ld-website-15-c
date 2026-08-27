@@ -13,3 +13,14 @@
 # same rule — change one and you must rename it, or clients keep the old copy for a year.
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Keep the deploy hosts out of search results. Every page's canonical already points at
+# lipsia.digital, so an indexed *.pages.dev copy would compete with the real site for
+# its own content. Scoped to the pages.dev names on purpose: these rules stop matching
+# by themselves the moment a custom domain fronts the project, so there is nothing to
+# remember to undo. Second pattern covers the per-deployment and per-branch subdomains.
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex
